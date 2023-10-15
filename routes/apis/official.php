@@ -84,48 +84,6 @@ Route::get('village/list', 'UserController@getNearVillageList');
 
 /*
 |--------------------------------------------------------------------------
-| 代仍相关
-|--------------------------------------------------------------------------
-*/
-// 代仍垃圾分类列表
-Route::get('throw/type/list', 'GarbageThrowController@getThrowGarbageTypes');
-
-// 选择可代仍的时间段列表
-Route::get('throw/timePeriod/list', 'GarbageThrowController@getThrowableTimePeriodList');
-
-// 代仍预约（创建代仍订单）
-Route::post('throw/order/create', 'GarbageThrowController@createGarbageThrowOrder');
-
-// 用户取消代仍预约
-Route::get('throw/order/cancel', 'GarbageThrowController@cancelGarbageThrowOrderByUser');
-
-// 用户完成代仍订单
-Route::get('throw/order/finish', 'GarbageThrowController@finishGarbageThrowOrder');
-
-// 用户评价代仍订单
-Route::post('throw/rate/add', 'GarbageThrowController@rateGarbageThrowOrder');
-
-// 用户代仍订单列表
-Route::get('throw/order/list', 'GarbageThrowController@getUserThrowOrderList');
-
-// 用户代仍订单详情
-Route::get('throw/order/info', 'GarbageThrowController@getUserThrowOrderInfo');
-
-// 用户我的代仍评价列表
-Route::get('throw/rate/list', 'GarbageThrowController@getUserGarbageThrowRateList');
-
-// 回收员取消代仍订单
-Route::get('throw/recycler/order/cancel', 'GarbageThrowController@cancelGarbageThrowOrderByRecycler');
-
-// 回收员代仍订单列表
-Route::get('throw/recycler/order/list', 'GarbageThrowController@getRecyclerThrowOrderList');
-
-// 回收员代仍订单详情
-Route::get('throw/recycler/order/info', 'GarbageThrowController@getRecyclerThrowOrderInfo');
-
-
-/*
-|--------------------------------------------------------------------------
 | 回收相关
 |--------------------------------------------------------------------------
 */
