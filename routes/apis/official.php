@@ -57,8 +57,6 @@ Route::get('jifen/order/detail', 'JifenController@getOrderDetail');
  * 优惠券相关
  * ========================
  */
-//代扔券列表
-Route::get('coupon/throw/list', 'CouponController@getThrowCouponList');
 
 
 /**=========================

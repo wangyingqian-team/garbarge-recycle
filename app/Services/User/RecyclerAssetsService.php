@@ -20,16 +20,6 @@ class RecyclerAssetsService
     }
 
     /**
-     * 增加代扔资产
-     *
-     * @param $recyclerId
-     * @param int $num
-     * @return bool
-     */
-    public function addThrowTotal($recyclerId, $num = 1) {
-        return app(RecyclerAssetsDto::class)->changeAssets($recyclerId, RecyclerConst::ASSETS_THROW, $num);
-    }
-    /**
      * 增加回收资产
      *
      * @param $recyclerId

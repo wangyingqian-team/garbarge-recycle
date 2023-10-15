@@ -10,10 +10,8 @@ use App\Dto\UserSignLogDto;
 use App\Events\UserRegisterEvent;
 use App\Exceptions\RestfulException;
 use App\Services\Common\ConfigService;
-use App\Services\Coupon\ThrowCouponService;
 use App\Supports\Constant\ActivityConst;
 use App\Supports\Constant\ConfigConst;
-use App\Supports\Constant\CouponConst;
 use App\Supports\Constant\RedisKeyConst;
 use Carbon\Carbon;
 use DB;
@@ -80,8 +78,6 @@ class UserService
         if (empty($sign)) {
             app(UserSignLogDto::class)->sign($userId);
             $redis->hset(RedisKeyConst::USER_SIGN, $userId, true);
-            //发一张代扔券
-            app(ThrowCouponService::class)->createCoupon($userId, CouponConst::THROW_ORIGIN_ONE);
         }
         return true;
     }

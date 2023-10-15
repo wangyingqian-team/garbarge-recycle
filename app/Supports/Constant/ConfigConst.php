@@ -18,12 +18,6 @@ class ConfigConst
 
     const RECYCLE_BANNER = 'recycle_banner'; //回收员端公告
 
-    const THROW_GARBAGE_TIME = 'throw_garbage_time'; //代扔垃圾时间段
-
-    const THROW_GARBAGE_NUM_PER_TIME = 'throw_garbage_num_per_time'; //每小时代扔垃圾数量
-
-    const THROW_GARBAGE_JIFEN_NUM = 'throw_garbage_jifen_num'; //每次代扔垃圾获得的能量积分
-
     const RECYCLE_GARBAGE_TIME = 'recycle_garbage_time'; //回收垃圾时间段
 
     const RECYCLE_GARBAGE_NUM_PER_TIME = 'recycle_garbage_num_per_time'; //每小时回收垃圾数量

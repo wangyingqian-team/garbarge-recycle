@@ -56,19 +56,6 @@ class UserAssetsService
     }
 
     /**
-     * 增加代扔单总数
-     *
-     * @param $userId
-     * @return int
-     */
-    public function addUserThrowTotal($userId)
-    {
-        $assets = app(UserAssetsDto::class)->getUserAssetsByUserId($userId);
-        $throwCount = $assets['throw_total'] + 1;
-        return app(UserAssetsDto::class)->addThrowTotal($userId, $throwCount);
-    }
-
-    /**
      * 增加回收单总数
      *
      * @param $userId

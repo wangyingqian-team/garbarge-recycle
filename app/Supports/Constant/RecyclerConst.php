@@ -10,7 +10,7 @@ class RecyclerConst
 
     const IS_DELETE = 3; //删除
 
-    const ASSETS_THROW = 1; //代扔资产
+//    const ASSETS_THROW = 1; //代扔资产
 
     const ASSETS_RECYCLE = 2; //回收资产
 

@@ -12,7 +12,7 @@ class RecyclerController extends BaseController
         $data['banner'] = app(ConfigService::class)->getConfig(ConfigConst::RECYCLE_BANNER);
         $data['announcement'] = app(ConfigService::class)->getConfig(ConfigConst::RECYCLE_ANNOUNCEMENT);
 
-        ##TODO 获取代扔订单和回收订单信息
+        ##TODO 获取回收订单信息
 
     }
 }

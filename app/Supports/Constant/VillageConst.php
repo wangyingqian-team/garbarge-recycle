@@ -4,20 +4,6 @@ namespace App\Supports\Constant;
 
 class VillageConst
 {
-    /*
-    |----------------------------------------
-    | 是否支持代仍
-    |----------------------------------------
-    */
-    /**
-     * 支持代仍
-     */
-    const THROW_IS_SUPPORTED = 1;
-
-    /**
-     * 不支持代仍
-     */
-    const THROW_IS_NOT_SUPPORTED = 2;
 
     /*
     |----------------------------------------
