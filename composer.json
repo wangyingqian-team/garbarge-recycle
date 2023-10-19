@@ -41,6 +41,9 @@
         "platform": {
             "ext-pcntl": "7.3",
             "ext-posix": "7.3"
+        },
+        "allow-plugins": {
+            "kylekatarnls/update-helper": true
         }
     },
     "extra": {

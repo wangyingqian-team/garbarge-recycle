@@ -31,30 +31,35 @@ class UserController extends BaseController
         return $this->success($userId);
     }
 
+    /**
+     * 获取用户详情
+     *
+     * @return mixed
+     */
     public function getUserDetail()
     {
+        /** @var UserService $userService */
         $userService = app(UserService::class);
 
         return $this->success($userService->getUserDetail($this->userId));
     }
 
+    /**
+     * 签到
+     *
+     * @return mixed
+     */
     public function sign()
     {
         app(UserService::class)->sign($this->userId);
         return $this->success();
     }
 
-    public function getNearVillageList()
-    {
-        $province = $this->request->get('province');
-        $city = $this->request->get('city');
-        $area = $this->request->get('area');
-
-        $data = app(VillageService::class)->getNearVillageList($province, $city, $area);
-
-        return $this->success($data);
-    }
-
+    /**
+     * 创建地址
+     *
+     * @return mixed
+     */
     public function createAddress()
     {
         $data = [
@@ -69,6 +74,11 @@ class UserController extends BaseController
         return $this->success();
     }
 
+    /**
+     * 更新地址
+     *
+     * @return mixed
+     */
     public function updateAddress()
     {
         $id = $this->request->get('id');
@@ -86,6 +96,11 @@ class UserController extends BaseController
         return $this->success();
     }
 
+    /**
+     * 删除地址
+     *
+     * @return mixed
+     */
     public function deleteAddress()
     {
         $id = $this->request->get('id');
