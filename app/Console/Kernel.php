@@ -2,10 +2,7 @@
 
 namespace App\Console;
 
-use App\Console\Commands\AutoCancelThrowOrder;
 use App\Console\Commands\AutoClearThrowOrderCountToday;
-use App\Console\Commands\AutoRateThrowOrder;
-use App\Console\Commands\AutoReceiveThrowOrder;
 use App\Console\Commands\ExpireThrowCoupon;
 use App\Console\Commands\InitTodayNewer;
 use Illuminate\Console\Scheduling\Schedule;
@@ -21,9 +18,6 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         ExpireThrowCoupon::class,
         InitTodayNewer::class,
-        AutoReceiveThrowOrder::class,
-        AutoCancelThrowOrder::class,
-        AutoRateThrowOrder::class,
         AutoClearThrowOrderCountToday::class
     ];
 
