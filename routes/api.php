@@ -19,7 +19,7 @@ Route::get('doc/{section?}', function ($any) {
 /**
  * 前台公众号接口
  */
-Route::group(['prefix' => 'official', 'namespace' => 'Official'], function () {
+Route::group(['namespace' => 'Official'], function () {
     require_once 'apis/official.php';
 });
 

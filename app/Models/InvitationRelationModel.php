@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class ActivityInvitationModel extends Model
+class InvitationRelationModel extends Model
 {
-    protected $table = 'activity_invitation';
+    protected $table = 'invitation_relation';
     public $timestamps = false;
 }

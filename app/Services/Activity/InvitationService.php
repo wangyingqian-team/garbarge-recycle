@@ -4,7 +4,7 @@
 namespace App\Services\Activity;
 
 use App\Dto\ActivityInvitationDto;
-use App\Models\ActivityInvitationModel;
+use App\Models\InvitationRelationModel;
 use App\Supports\Constant\ActivityConst;
 
 /**
@@ -23,7 +23,7 @@ class InvitationService
      * @return bool
      */
     public function createInvitation($userId, $superiorId){
-        return ActivityInvitationModel::query()->insert([
+        return InvitationRelationModel::query()->insert([
             'user_id' => $userId,
             'superior_id' => $superiorId,
             'level' => ActivityConst::ACTIVITY_INVITATION_DEFAULT_LEVEL,
@@ -39,7 +39,7 @@ class InvitationService
      * @return int
      */
     public function updateInvitationExp($userId, $money) {
-        $invitation = ActivityInvitationModel::query()->where('user_id', $userId)->macroFirst();
+        $invitation = InvitationRelationModel::query()->where('user_id', $userId)->macroFirst();
         $exp = $money * 100 + $invitation['exp'];
         $level = $invitation['level'];
 
@@ -48,7 +48,7 @@ class InvitationService
         }
         //todo 增加绿豆
 
-        return ActivityInvitationModel::query()->where('user_id', $userId)->update(['exp' => $exp, 'level' => $level]);
+        return InvitationRelationModel::query()->where('user_id', $userId)->update(['exp' => $exp, 'level' => $level]);
     }
 
     /**
@@ -58,7 +58,7 @@ class InvitationService
      * @return array
      */
     public function getInvitationListBySuperiorId($superiorId) {
-        return ActivityInvitationModel::query()->where('superior_id', $superiorId)->get()->toArray() ?? [];
+        return InvitationRelationModel::query()->where('superior_id', $superiorId)->get()->toArray() ?? [];
     }
 
     /**

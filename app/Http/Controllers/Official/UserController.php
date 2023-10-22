@@ -44,6 +44,18 @@ class UserController extends BaseController
         return $this->success($userService->getUserDetail($this->userId));
     }
 
+    public function updateInfo()
+    {
+        /** @var UserService $userService */
+        $userService = app(UserService::class);
+        $val = [
+            'nickname' => $this->request->get('nickname'),
+            'avatar' => $this->request->get('headimgurl'),
+            'mobile' => $this->request->get('mobile')
+        ];
+        return $this->success($userService->update($val));
+    }
+
     /**
      * 签到
      *
@@ -63,13 +75,15 @@ class UserController extends BaseController
     public function createAddress()
     {
         $data = [
+            'user_id' => $this->userId,
             'village_id' => $this->request->get('village_id'),
-            'village_floor_id' => $this->request->get('village_floor_id'),
             'mobile' => $this->request->get('mobile'),
             'address' => $this->request->get('address'),
             'is_default' => $this->request->get('is_default', false)
         ];
-        app(UserAddressService::class)->createAddress($this->userId, $data);
+        /** @var UserService $userService */
+        $userService = app(UserService::class);
+        $userService->createAddress($this->userId, $data);
 
         return $this->success();
     }
@@ -91,7 +105,9 @@ class UserController extends BaseController
             'is_default' => $this->request->get('is_default', false)
         ];
 
-        app(UserAddressService::class)->updateAddress($id, $data);
+        /** @var UserService $userService */
+        $userService = app(UserService::class);
+        $userService->updateAddress($this->userId, $data);
 
         return $this->success();
     }
@@ -104,19 +120,21 @@ class UserController extends BaseController
     public function deleteAddress()
     {
         $id = $this->request->get('id');
-        app(UserAddressService::class)->deleteAddress($id);
+       app(UserService::class)->deleteAddress($id);
         return $this->success();
     }
 
+    //获取地址列表
     public function getAddressList()
     {
-        $data = app(UserAddressService::class)->getAddressListByUserId($this->userId);
+        $data = app(UserService::class)->getAddressList($this->userId);
         return $this->success($data);
     }
 
+    //获取地址详情
     public function getAddressDetail()
     {
-        $data = app(UserAddressService::class)->getAddressById($this->request->get('id'));
+        $data = app(UserService::class)->getAddressDetail($this->request->get('id'));
 
         return $this->success($data);
     }
