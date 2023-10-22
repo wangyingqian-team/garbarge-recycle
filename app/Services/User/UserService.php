@@ -103,13 +103,12 @@ class UserService
         $redis = Redis::connection('user');
         $sign = $redis->hget(RedisKeyConst::USER_SIGN, $userId);
         if (empty($sign)) {
-            app(UserSignLogDto::class)->sign($userId);
+            //送积分
+            $jifen = 10;
+            $this->increaseJifen($userId, $jifen);
             $redis->hset(RedisKeyConst::USER_SIGN, $userId, true);
         }
 
-        //送积分
-        $jifen = 10;
-        $this->increaseJifen($userId, $jifen);
         return true;
     }
 

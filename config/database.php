@@ -135,14 +135,15 @@ return [
             'host' => env('REDIS_HOST', '119.45.36.224'),
             'password' => env('REDIS_PASSWORD', 'mmp123WOCAO'),
             'port' => env('REDIS_PORT', 6379),
-            'database' => 2
+            'database' => 1
         ],
         'user' => [
             'host' => env('REDIS_HOST', '119.45.36.224'),
             'password' => env('REDIS_PASSWORD', 'mmp123WOCAO'),
             'port' => env('REDIS_PORT', 6379),
-            'database' => 3
+            'database' => 2
         ],
+        
         'admin' => [
             'host' => env('REDIS_HOST', '119.45.36.224'),
             'password' => env('REDIS_PASSWORD', 'mmp123WOCAO'),

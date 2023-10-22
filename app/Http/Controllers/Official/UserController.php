@@ -139,49 +139,4 @@ class UserController extends BaseController
         return $this->success($data);
     }
 
-    /**
-     * 领取奖励
-     *
-     * @return mixed
-     */
-    public function receiveActivityReward() {
-        $activityId = $this->request->get('activity_id');
-        $type = $this->request->get('type');
-        $reward = $this->request->get('reward');
-        app(UserService::class)->completeActivity($this->userId,$activityId, $type,$reward);
-
-        return $this->success();
-    }
-
-    public function getInviteActivityList() {
-        $data['count'] = app(UserService::class)->getUserInvitationCount($this->userId);
-        $data['list'] = app(InvitationService::class)->getInvitationList();
-        $receivedLog = app(UserService::class)->getActivityLog($this->userId,ActivityConst::ACTIVITY_INVITE);
-        $receivedLog = collect($receivedLog)->keyBy('activity_id');
-        foreach ($data['list'] as &$value){
-            $value['can_receive'] = ($data['count'] >= $value['invite_user_count']);
-            $value['is_received'] = isset($receivedLog[$value['id']]);
-        }
-
-        return $this->success($data);
-    }
-
-    public function getNewerActivityList() {
-        $type = $this->request->get('type');
-        $assets = app(UserAssetsService::class)->getUserAssets($this->userId);
-        if ($type == ActivityConst::ACTIVITY_NEWER_THROW) {
-            $data['count'] = $assets['throw_total'];
-        }else{
-            $data['count'] = $assets['recycle_total'];
-        }
-        $data['list'] = app(NewerService::class)->getActivityList();
-        $receivedLog = app(UserService::class)->getActivityLog($this->userId,ActivityConst::ACTIVITY_NEWER);
-        $receivedLog = collect($receivedLog)->keyBy('activity_id');
-        foreach ($data['list'] as &$value){
-            $value['can_receive'] = ($data['count'] >= $value['total_count']);
-            $value['is_received'] = isset($receivedLog[$value['id']]);
-        }
-
-        return $this->success($data);
-    }
 }
