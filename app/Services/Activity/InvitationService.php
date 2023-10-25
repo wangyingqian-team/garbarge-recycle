@@ -29,6 +29,12 @@ class InvitationService
      */
     public function createInvitation($userId, $superiorId)
     {
+        //检查是否绑定
+        $exist = InvitationRelationModel::query()->where('user_id', $userId)->exists();
+        if ($exist){
+            throw new RestfulException('该用户已经绑定了其他用户');
+        }
+
         InvitationRelationModel::query()->insert([
             'user_id' => $userId,
             'superior_id' => $superiorId,
