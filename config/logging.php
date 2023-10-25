@@ -67,9 +67,9 @@ return [
             'level' => 'info',
             'days' => 7,
         ],
-        'throw' => [
+        'activity' => [
             'driver' => 'single',
-            'path' => storage_path('logs/throw.log'),
+            'path' => storage_path('logs/activity.log'),
             'level' => 'info',
             'days' => 7,
         ],

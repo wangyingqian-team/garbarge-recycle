@@ -3,9 +3,14 @@
 
 namespace App\Services\Activity;
 
-use App\Dto\ActivityInvitationDto;
+use App\Exceptions\RestfulException;
+use App\Models\InvitationRecordModel;
 use App\Models\InvitationRelationModel;
+use App\Models\UserAssetsModel;
 use App\Supports\Constant\ActivityConst;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 
 /**
  * 邀请有礼活动
@@ -22,63 +27,117 @@ class InvitationService
      * @param $superiorId
      * @return bool
      */
-    public function createInvitation($userId, $superiorId){
-        return InvitationRelationModel::query()->insert([
+    public function createInvitation($userId, $superiorId)
+    {
+        InvitationRelationModel::query()->insert([
             'user_id' => $userId,
             'superior_id' => $superiorId,
-            'level' => ActivityConst::ACTIVITY_INVITATION_DEFAULT_LEVEL,
-            'exp' => 0
         ]);
+        $redis = Redis::connection('activity');
+        $level = $redis->hget('invitation_level', $superiorId) ?: 0;
+        $nc = ActivityConst::ACTIVITY_INVITATION_LEVEL[$level + 1];
+        $count = InvitationRelationModel::query()->where('superior_id', $superiorId)->where('is_active', 1)->count();
+        if ($count >= $nc) {
+            //等级增加
+            $redis->hset('invitation_level', $superiorId, $level + 1);
+        }
+
+        return true;
     }
 
     /**
-     * 邀请关系升级
+     * 获得绿豆
      *
      * @param $userId
+     * @param $orderNo
      * @param $money
+     * @return bool
+     */
+    public function getBean($userId, $orderNo, $money)
+    {
+        //计算绿豆
+        $level = Redis::connection('activity')->hget('invitation_level', $userId) ?: 0;
+        $multi = ActivityConst::ACTIVITY_BEAN_MULTI[$level];
+        $bean = round($money, $multi);
+        DB::beginTransaction();
+        try {
+            //生成记录
+            InvitationRecordModel::query()->insert([
+                'user_id' => $userId,
+                'order_no' => $orderNo,
+                'bean' => $bean,
+                'status' => 2
+            ]);
+
+            //更新绿豆
+            $assert = UserAssetsModel::query()->where('user_id', $userId)->macroFirst();
+            $bean += $assert['bean'];
+            UserAssetsModel::query()->where('user_id', $userId)->update(['bean' => $bean]);
+        } catch (\Throwable $e) {
+            Log::channel('activity')->warn(['msg' => '绿豆增加失败', 'order' => $orderNo]);
+            DB::rollBack();
+        }
+
+        DB::commit();
+
+        return true;
+    }
+
+    /**
+     * 花费绿豆
+     *
+     * @param $userId
+     * @param $orderNo
+     * @param $bean
+     */
+    public function costBean($userId, $orderNo, $bean)
+    {
+        DB::beginTransaction();
+        try {
+            //查询绿豆数量
+            $assert = $assert = UserAssetsModel::query()->where('user_id', $userId)->macroFirst();
+            if ($assert['bean'] < $bean) {
+                throw new RestfulException('绿豆数量不足');
+            }
+
+            $nb = bcsub($assert['bean'], $bean);
+            UserAssetsModel::query()->where('user_id', $userId)->update(['bean' => $nb]);
+
+            //生成记录
+            InvitationRecordModel::query()->insert([
+                'user_id' => $userId,
+                'order_no' => $orderNo,
+                'bean' => -$bean,
+                'status' => 1
+            ]);
+
+        } catch (\Throwable $e){
+            Log::channel('activity')->warn( ['msg' => "{$orderNo}绿豆花费失败", 'data' => $e->getMessage()]);
+            DB::rollBack();
+        }
+
+        DB::commit();
+    }
+
+    /**
+     * 绿豆消费成功
+     *
+     * @param $orderNo
      * @return int
      */
-    public function updateInvitationExp($userId, $money) {
-        $invitation = InvitationRelationModel::query()->where('user_id', $userId)->macroFirst();
-        $exp = $money * 100 + $invitation['exp'];
-        $level = $invitation['level'];
+    public function consumeBean($orderNo)
+    {
+        return InvitationRecordModel::query()->where('order_no', $orderNo)->update(['status'=>2]);
+    }
 
-        if ($level < count(ActivityConst::ACTIVITY_INVITATION_LEVEL) && $exp >= ActivityConst::ACTIVITY_INVITATION_LEVEL[$level + 1]){
-            $level +=1;
+    public function getBeanRecord($userId, $type, $page, $pageSize)
+    {
+        //1 是 获得 2是消费
+        if ($type = 1) {
+            $where = ['user_id'=> $userId, ['bean', '>', 0]];
+            return InvitationRecordModel::query()->macroQuery($where, ['*'], [], $page, $pageSize, 1);
+        }else{
+
         }
-        //todo 增加绿豆
-
-        return InvitationRelationModel::query()->where('user_id', $userId)->update(['exp' => $exp, 'level' => $level]);
     }
-
-    /**
-     * 获取下级列表
-     *
-     * @param $superiorId
-     * @return array
-     */
-    public function getInvitationListBySuperiorId($superiorId) {
-        return InvitationRelationModel::query()->where('superior_id', $superiorId)->get()->toArray() ?? [];
-    }
-
-    /**
-     * 获取绿豆账单详情
-     *
-     * @param $id
-     * @return mixed
-     */
-    public function getBeanBillDetail($id) {
-
-    }
-
-    /**
-     * 获取绿豆账单列表
-     *
-     * @param $superiorId
-     * @return mixed
-     */
-    public function getBeanBillListBySuperiorId($superiorId) {
-
-    }
-
 }
