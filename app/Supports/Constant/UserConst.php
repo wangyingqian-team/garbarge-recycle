@@ -31,19 +31,7 @@ class UserConst
 
     //会员权益
     const LEVEL_EQUITY = [
-        //抽奖次数
-        'chou_jiang' => [
-            1,
-            1,
-            2,
-            2,
-            3,
-            3,
-            3,
-            4,
-            4,
-            5
-        ],
+
         //额外积分
         'ji_fen_extra' => [
             0,

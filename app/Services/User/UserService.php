@@ -76,6 +76,7 @@ class UserService
         $userInfo['asserts'] = UserAssetsModel::query()->where('user_id', $userId)->macroFirst();
         //会员权益
         $equity = $this->getUserEquity($userId);
+        $userInfo['equity'] = $equity;
         //上级userid
         $superior = InvitationRelationModel::query()->where('user_id', $userId)->where('is_active', 1)->macroFirst();
         $userInfo['superior_id'] = $superior['superior_id'] ?? 0;
@@ -247,6 +248,10 @@ class UserService
         foreach (UserConst::LEVEL_EQUITY as $k => $v) {
             $equity[$k] = $v[$level];
         }
+
+        //获取免费抽奖次数
+        $redis = Redis::connection('activity');
+        $equity['free_chou'] = !(bool)$redis->hget('chou_jiang', $userId);
 
         return $equity;
     }
