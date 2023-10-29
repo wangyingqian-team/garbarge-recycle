@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Official;
 use App\Services\Jifen\JifenItemService;
 use App\Services\Jifen\JifenOrderService;
 use App\Services\User\UserAssetsService;
-use App\Supports\Constant\JifenConst;
+use App\Supports\Constant\AssertConst;
 
 class JifenController extends BaseController
 {
@@ -45,7 +45,7 @@ class JifenController extends BaseController
         $itemId = $this->request->get('item_id');
         $num = $this->request->get('num');
         $jifen = $this->request->get('jifen');
-        $deliveryType = $this->request->get('delivery_type',  JifenConst::JI_FEN_DELIVERY_TWO);
+        $deliveryType = $this->request->get('delivery_type',  AssertConst::JI_FEN_DELIVERY_TWO);
 
         app(JifenOrderService::class)->create($this->userId, $itemId, $num, $jifen, $deliveryType);
 

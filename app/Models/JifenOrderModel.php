@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Supports\Constant\ JifenConst;
+use App\Supports\Constant\ AssertConst;
 use Illuminate\Database\Eloquent\Model;
 
 class JifenOrderModel extends Model
@@ -13,11 +13,11 @@ class JifenOrderModel extends Model
 
     public function getStatusZhAttribute()
     {
-        return  JifenConst::JI_FEN_ORDER_STATUS_MAP[$this->attributes['status']];
+        return  AssertConst::JI_FEN_ORDER_STATUS_MAP[$this->attributes['status']];
     }
 
     public function getDeliveryZhAttribute()
     {
-        return  JifenConst::JI_FEN_DELIVERY_MAP[$this->attributes['delivery_type']];
+        return  AssertConst::JI_FEN_DELIVERY_MAP[$this->attributes['delivery_type']];
     }
 }

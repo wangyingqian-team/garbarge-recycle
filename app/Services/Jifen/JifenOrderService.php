@@ -7,7 +7,7 @@ use App\Events\JifenOrderCreateEvent;
 use App\Exceptions\RestfulException;
 use App\Services\User\UserAssetsService;
 use App\Services\User\UserService;
-use App\Supports\Constant\ JifenConst;
+use App\Supports\Constant\ AssertConst;
 use Illuminate\Support\Facades\DB;
 
 class JifenOrderService
@@ -39,7 +39,7 @@ class JifenOrderService
 
         $item = app(JifenItemService::class)->getItemInfoById($itemId, false);
         $iData = [
-            'order_no' => generate_order_no($userId,  JifenConst::JI_FEN_ORDER_PREFIX),
+            'order_no' => generate_order_no($userId,  AssertConst::JI_FEN_ORDER_PREFIX),
             'user_id' => $userId,
             'title' => $item['title'],
             'image' => $item['primary_image'],
@@ -47,7 +47,7 @@ class JifenOrderService
             'num' => $num,
             'delivery_type' => $deliveryType,
             'jifen_cost' => $jifen,
-            'status' =>  JifenConst::JI_FEN_ORDER_WAIT_STATUS,
+            'status' =>  AssertConst::JI_FEN_ORDER_WAIT_STATUS,
             'remark' => ''
         ];
 

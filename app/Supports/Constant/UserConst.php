@@ -60,4 +60,37 @@ class UserConst
         ],
     ];
 
+    //默认信用值
+    const DEFAULT_CREDIT = 100;
+
+    //低于50信用值将无法预约
+    const MIN_CREDIT = 50;
+
+    //信用值变化情况
+    const CREDIT_CHANGE = [
+        'increase' => [
+            'sign' => 2, //签到
+            'garbage_sell_count' => 5, //完成一次垃圾售卖
+        ],
+        'decrease' => [
+            'short_weight' => 7, //没有达到起收重量
+            'break_promise' => 10, // 爽约
+            'deception' => 25, // 售卖过程中出现欺骗行为，比如纸壳加湿，参杂等行为
+        ],
+        'month_settle' => [
+            [
+                'amount' => 100,
+                'number' => 30,
+            ],
+            [
+                'amount' => 50,
+                'number' => 20,
+            ],
+            [
+                'amount' => 20,//当月完成20元垃圾售卖
+                'number' => 10, //奖励10信用
+            ],
+
+        ]
+    ];
 }
