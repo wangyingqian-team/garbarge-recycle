@@ -156,7 +156,6 @@ class UserService
                 $iData = [
                     'user_id' => $userId,
                     'village_id' => $data['village_id'],
-                    'village_floor_id' => $data['village_floor_id'],
                     'address' => $data['address'],
                     'mobile' => $data['mobile'],
                     'is_default' => $data['is_default'],
@@ -189,7 +188,6 @@ class UserService
 
                 $iData = [
                     'village_id' => $data['village_id'] ?? null,
-                    'village_floor_id' => $data['village_floor_id'] ?? null,
                     'address' => $data['address'] ?? null,
                     'mobile' => $data['mobile'] ?? null,
                     'is_default' => $data['is_default'] ?? null,
