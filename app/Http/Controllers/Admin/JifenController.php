@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Services\Jifen\JifenItemService;
-use App\Services\Jifen\JifenOrderService;
+use App\Services\JifenShop\JifenItemService;
+use App\Services\JifenShop\JifenOrderService;
 
 class JifenController extends BaseController
 {

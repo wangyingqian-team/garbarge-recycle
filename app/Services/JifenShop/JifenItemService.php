@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Jifen;
+namespace App\Services\JifenShop;
 
 use App\Dto\JifenItemDto;
 use App\Exceptions\RestfulException;

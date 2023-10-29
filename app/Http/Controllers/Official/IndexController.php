@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Official;
 
 use App\Services\Common\ConfigService;
-use App\Services\Jifen\JifenItemService;
+use App\Services\JifenShop\JifenItemService;
 use App\Supports\Constant\ConfigConst;
 
 class IndexController extends BaseController

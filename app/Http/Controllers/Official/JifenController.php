@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Official;
 
-use App\Services\Jifen\JifenItemService;
-use App\Services\Jifen\JifenOrderService;
+use App\Services\JifenShop\JifenItemService;
+use App\Services\JifenShop\JifenOrderService;
 use App\Services\User\UserAssetsService;
 use App\Supports\Constant\AssertConst;
 
