@@ -5,6 +5,7 @@ namespace App\Console;
 use App\Console\Commands\AutoCheckInvitationActive;
 use App\Console\Commands\AutoClearSign;
 use App\Console\Commands\CouponExpire;
+use App\Console\Commands\NewerExpire;
 use App\Console\Commands\SettleCredit;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -21,6 +22,7 @@ class Kernel extends ConsoleKernel
         AutoCheckInvitationActive::class,
         CouponExpire::class,
         SettleCredit::class,
+        NewerExpire::class,
     ];
 
     /**
@@ -36,6 +38,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('garbage:invitation_active')->dailyAt('3:00');
 
         $schedule->command('garbage:coupon_expire')->dailyAt('21:00');
+
+        $schedule->command('garbage:newer_expire')->dailyAt('22:00');
 
         $schedule->command('garbage:clear_sign')->dailyAt('23:59');
 

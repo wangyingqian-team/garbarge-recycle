@@ -7,6 +7,7 @@ use App\Models\InvitationRelationModel;
 use App\Models\UserAddressModel;
 use App\Models\UserAssetsModel;
 use App\Models\UserModel;
+use App\Services\Activity\NewerService;
 use App\Supports\Constant\RedisKeyConst;
 use App\Supports\Constant\UserConst;
 use Illuminate\Support\Facades\Redis;
@@ -34,8 +35,11 @@ class UserService
         //统计今日新增人数
         Redis::connection('user')->incr(RedisKeyConst::TODAY_NEWER);
 
+        //添加新人标志
+        app(NewerService::class)->newer($userId);
+
         //用户注册事件
-        event(new UserRegisterEvent($userId));
+        //event(new UserRegisterEvent($userId));
 
         return $userId;
     }
