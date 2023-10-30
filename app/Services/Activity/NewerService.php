@@ -44,6 +44,8 @@ class NewerService
      */
     public function firstOrder($userId, $orderAmount)
     {
+        //todo查询是否有订单记录
+
         //订单门槛金额 => 代金券id
         $amount = [
             100 => 15,
