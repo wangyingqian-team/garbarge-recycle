@@ -129,24 +129,12 @@ class GarbageRecycleOrderService
             'recycling_start_time' => $recyclingDate . ' ' . $recyclingStartTime,
             'recycling_end_time' => $recyclingDate . ' ' . $recyclingEndTime,
             'total_amount' => $garbageTotalAmount,
-            'remark' => $remark
         ];
-        $garbageRecycleOrderItemsData = array_map(function ($recycleItem) use ($orderNo) {
-            return [
-                'order_no' => $orderNo,
-                'garbage_category_id' => $recycleItem['garbage_category_id'],
-                'garbage_type_id' => $recycleItem['garbage_type_id'],
-                'price' => $recycleItem['price'],
-                'pre_weight' => $recycleItem['pre_weight']
-            ];
-        }, $recycleItems);
 
 
         // 创建回收订单.
-        DB::transaction(function () use ($garbageRecycleOrderData, $garbageRecycleOrderItemsData) {
-            // 生成回收主订单记录.
-            app(GarbageRecycleOrderDto::class)->createRecycleOrder($garbageRecycleOrderData);
-        });
+        app(GarbageRecycleOrderDto::class)->createRecycleOrder($garbageRecycleOrderData);
+
 
         // 订单创建成功，发起异步事件.
         event(new GarbageRecycleOrderCreateEvent([
