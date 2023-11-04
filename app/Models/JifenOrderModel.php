@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Supports\Constant\ AssertConst;
+use App\Supports\Constant\AssertConst;
 use Illuminate\Database\Eloquent\Model;
 
 class JifenOrderModel extends Model

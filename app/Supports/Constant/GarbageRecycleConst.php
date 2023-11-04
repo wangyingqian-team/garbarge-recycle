@@ -2,80 +2,72 @@
 
 namespace App\Supports\Constant;
 
+/**
+ * Class GarbageRecycleConst.
+ *
+ * @package App\Supports\Constant
+ */
 class GarbageRecycleConst
 {
     /*
     |----------------------------------------
-    | 废品垃圾种类
+    | 回收订单常量配置KEY
     |----------------------------------------
     */
     /**
-     * 废品垃圾种类：常用种类
+     * 回收垃圾时间段配置
      */
-    const GARBAGE_RECYCLE_TYPE_POPULAR = 1;
+    const GARBAGE_RECYCLE_APPOINT_PERIOD = 'recycle_appoint_period';
 
     /**
-     * 废品垃圾种类：非常用种类
+     * 回收垃圾每个时间段最大预约单数
      */
-    const GARBAGE_RECYCLE_TYPE_UNPOPULAR = 2;
-
-    /**
-     * 废品垃圾种类
-     */
-    const GARBAGE_RECYCLE_TYPES = [
-        self::GARBAGE_RECYCLE_TYPE_POPULAR,
-        self::GARBAGE_RECYCLE_TYPE_UNPOPULAR
-    ];
+    const GARBAGE_RECYCLE_MAX_ORDERS_PER_PERIOD = 'recycle_appoint_period';
 
     /*
     |----------------------------------------
-    | 代仍垃圾订单状态
+    | 回收订单状态
     |----------------------------------------
     */
     /**
      * 回收垃圾订单状态：已预约
      */
-    const GARBAGE_RECYCLE_ORDER_STATUS_RESERVED = 1;
+    const GARBAGE_RECYCLE_ORDER_STATUS_RESERVED = 10;
 
     /**
      * 回收垃圾订单状态：已接单
      */
-    const GARBAGE_RECYCLE_ORDER_STATUS_RECEIVED = 2;
+    const GARBAGE_RECYCLE_ORDER_STATUS_RECEIVED = 20;
 
     /**
-     * 回收垃圾订单状态：待完成
+     * 回收垃圾订单状态：回收中
      */
-    const GARBAGE_RECYCLE_ORDER_STATUS_WAIT_FINISH = 3;
+    const GARBAGE_RECYCLE_ORDER_STATUS_RECYCLING = 30;
 
     /**
      * 回收垃圾订单状态：已完成
      */
-    const GARBAGE_RECYCLE_ORDER_STATUS_FINISHED = 4;
+    const GARBAGE_RECYCLE_ORDER_STATUS_FINISHED = 40;
 
     /**
-     * 回收垃圾订单状态：已评价
+     * 回收垃圾订单状态：已取消（用户主动取消）
      */
-    const GARBAGE_RECYCLE_ORDER_STATUS_RATED = 5;
+    const GARBAGE_RECYCLE_ORDER_STATUS_USER_CANCELED = 51;
 
     /**
-     * 回收垃圾订单状态：系统取消
+     * 回收垃圾订单状态：已取消（回收员主动取消，一般是提前感知来不及上门了）
      */
-    const GARBAGE_RECYCLE_ORDER_STATUS_SYSTEM_CANCELED = 6;
+    const GARBAGE_RECYCLE_ORDER_STATUS_RECYCLER_CANCELED = 52;
 
     /**
-     * 回收垃圾订单状态：用户预约取消
+     * 回收垃圾订单状态：已取消（用户爽约取消）
      */
-    const GARBAGE_RECYCLE_ORDER_STATUS_USER_RESERVE_CANCELED = 7;
+    const GARBAGE_RECYCLE_ORDER_STATUS_BREAK_PROMISE_CANCELED = 53;
 
     /**
-     * 回收垃圾订单状态：用户确认取消
+     * 回收垃圾订单状态：已取消（回收员上门超时取消，系统定时任务触发该状态）
      */
-    const GARBAGE_RECYCLE_ORDER_STATUS_USER_CONFIRM_CANCELED = 8;
-
-    /**
-     * 回收垃圾订单状态：回收员取消
-     */
-    const GARBAGE_RECYCLE_ORDER_STATUS_RECYCLER_CANCELED = 9;
+    const GARBAGE_RECYCLE_ORDER_STATUS_TIMEOUT_CANCELED = 54;
 
     /**
      * 回收垃圾订单状态映射
@@ -83,44 +75,11 @@ class GarbageRecycleConst
     const GARBAGE_RECYCLE_ORDER_STATUS_MAP = [
         self::GARBAGE_RECYCLE_ORDER_STATUS_RESERVED => '已预约',
         self::GARBAGE_RECYCLE_ORDER_STATUS_RECEIVED => '已接单',
-        self::GARBAGE_RECYCLE_ORDER_STATUS_WAIT_FINISH => '待完成',
+        self::GARBAGE_RECYCLE_ORDER_STATUS_RECYCLING => '回收中',
         self::GARBAGE_RECYCLE_ORDER_STATUS_FINISHED => '已完成',
-        self::GARBAGE_RECYCLE_ORDER_STATUS_RATED => '已评价',
-        self::GARBAGE_RECYCLE_ORDER_STATUS_SYSTEM_CANCELED => '系统取消',
-        self::GARBAGE_RECYCLE_ORDER_STATUS_USER_RESERVE_CANCELED => '用户预约取消',
-        self::GARBAGE_RECYCLE_ORDER_STATUS_USER_CONFIRM_CANCELED => '用户确认取消',
-        self::GARBAGE_RECYCLE_ORDER_STATUS_RECYCLER_CANCELED => '回收员取消'
+        self::GARBAGE_RECYCLE_ORDER_STATUS_USER_CANCELED => '已取消（用户主动取消）',
+        self::GARBAGE_RECYCLE_ORDER_STATUS_RECYCLER_CANCELED => '已取消（回收员主动取消）',
+        self::GARBAGE_RECYCLE_ORDER_STATUS_BREAK_PROMISE_CANCELED => '已取消（用户爽约取消）',
+        self::GARBAGE_RECYCLE_ORDER_STATUS_TIMEOUT_CANCELED => '已取消（回收员上门超时取消）'
     ];
-
-    /*
-    |----------------------------------------
-    | 回收垃圾评价类型
-    |----------------------------------------
-    */
-    /**
-     * 回收垃圾评价类型：好评
-     */
-    const GARBAGE_RECYCLE_RATE_TYPE_GOOD = 1;
-
-    /**
-     * 回收垃圾评价类型：差评
-     */
-    const GARBAGE_RECYCLE_RATE_TYPE_BAD = 2;
-
-    /**
-     * 回收垃圾评价类型
-     */
-    const GARBAGE_RECYCLE_RATE_TYPES = [
-        self::GARBAGE_RECYCLE_RATE_TYPE_GOOD,
-        self::GARBAGE_RECYCLE_RATE_TYPE_BAD
-    ];
-
-    /**
-     * 回收垃圾评价类型映射
-     */
-    const GARBAGE_RECYCLE_RATE_TYPE_MAP = [
-        self::GARBAGE_RECYCLE_RATE_TYPE_GOOD => '好评',
-        self::GARBAGE_RECYCLE_RATE_TYPE_BAD => '差评'
-    ];
-
 }

@@ -2,29 +2,27 @@
 
 namespace App\Services\GarbageRecycle;
 
-use App\Dto\GarbageCategoryDto;
+use App\Models\GarbageCategoryModel;
+use App\Supports\Macro\Builder;
 
 class GarbageCategoryService
 {
-    /** @var GarbageCategoryDto */
-    public $dto;
-
-    public function __construct()
-    {
-        $this->dto = app(GarbageCategoryDto::class);
-    }
-
     /**
      * 查询垃圾回收大类列表
      *
-     * @param array $filters
+     * @param array $where
      * @param array $select
+     * @param array $orderBy
+     * @param int $page
+     * @param int $limit
+     * @param boolean $withPage
+     *
      * @return mixed
      *
      */
-    public function getGarbageCategoryList($filters, $select)
+    public function getGarbageCategoryList($where, $select, $orderBy, $page = 0, $limit = Builder::PER_LIMIT, $withPage = false)
     {
-        return $this->dto->getGarbageCategoryList($filters, $select, ['id' => 'asc']);
+        return GarbageCategoryModel::query()->macroQuery($where, $select, $orderBy, $page, $limit);
     }
 
     /**
@@ -36,7 +34,7 @@ class GarbageCategoryService
      */
     public function getGarbageCategoryInfo($categoryId)
     {
-        return $this->dto->getGarbageCategoryInfo($categoryId);
+        return GarbageCategoryModel::query()->whereKey($categoryId)->macroFirst();
     }
 
     /**
@@ -48,7 +46,9 @@ class GarbageCategoryService
      */
     public function addGarbageCategory($categoryName)
     {
-        return $this->dto->addGarbageCategory($categoryName);
+        return GarbageCategoryModel::query()->insertGetId([
+            'name' => $categoryName
+        ]);
     }
 
     /**
@@ -62,7 +62,9 @@ class GarbageCategoryService
      */
     public function updateGarbageCategory($categoryId, $categoryName)
     {
-        return $this->dto->updateGarbageCategory($categoryId, $categoryName);
+        return GarbageCategoryModel::query()->whereKey($categoryId)->update([
+            'name' => $categoryName
+        ]);
     }
 
     /**
@@ -75,6 +77,6 @@ class GarbageCategoryService
      */
     public function deleteGarbageCategory($categoryId)
     {
-        return $this->dto->deleteGarbageCategory($categoryId);
+        return GarbageCategoryModel::query()->whereKey($categoryId)->delete();
     }
 }

@@ -8,19 +8,20 @@ use App\Events\GarbageRecycleOrderCancelEvent;
 use App\Events\GarbageRecycleOrderCreateEvent;
 use App\Exceptions\RestfulException;
 use App\Services\Common\ConfigService;
-use App\Services\Village\VillageService;
+use App\Services\User\AddressService;
+use App\Services\User\VillageService;
 use App\Supports\Constant\ConfigConst;
 use App\Supports\Constant\GarbageRecycleConst;
 use App\Supports\Constant\GarbageSiteConst;
 use App\Supports\Constant\RedisKeyConst;
-use App\Supports\Constant\VillageConst;
+use App\Supports\Constant\UserConst;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 
 class GarbageRecycleOrderService
 {
     /**
-     * 查询指定小区指定日期的可回收时间段列表.
+     * 查询指定小区的可回收时间段列表.
      *
      * @param string $recyclingDate
      * @param int $villageId
@@ -29,126 +30,58 @@ class GarbageRecycleOrderService
      */
     public function getRecycleTimePeriodList($recyclingDate, $villageId)
     {
-        // 判断用户选择的小区是否开启支持代仍.
-        $villageInfo = app(VillageService::class)->getVillageDetail($villageId, ['*', 'recycler.*']);
+        // 判断用户选择的小区是否开放.
+        $villageInfo = app(VillageService::class)->getVillageInfo($villageId);
         if (empty($villageInfo)) {
             throw new RestfulException('该小区信息不存在，请重新选择！');
         }
-        if ($villageInfo['is_recycle'] != VillageConst::RECYCLE_IS_SUPPORTED) {
+
+        if ($villageInfo['is_active'] == UserConst::VILLAGE_STATUS_INACTIVE) {
             throw new RestfulException('抱歉，该小区目前暂未开通回收服务，请耐心期待！');
         }
-        $isThrow = $villageInfo['is_throw'];
-        $recyclerId = $villageInfo['recycler']['id'];
 
-        $throwTimePeriods = app(ConfigService::class)->getConfig(ConfigConst::THROW_GARBAGE_TIME);
-        $recycleTimePeriods = app(ConfigService::class)->getConfig(ConfigConst::RECYCLE_GARBAGE_TIME);
+        // 查询所有支持的回收时间段.
+        $allRecyclePeriod = app(ConfigService::class)->getConfig(GarbageRecycleConst::GARBAGE_RECYCLE_APPOINT_PERIOD);
 
-        // 获取所有回收时间段
-        if (!$isThrow) {
-            // 如果该小区不支持代仍，直接取配置的回收时间段
-            $allRecyclePeriod = $recycleTimePeriods;
-        } else {
-            // 否则，取代仍时间段与回收时间段的差集
-            $allRecyclePeriod = array_filter($recycleTimePeriods, function ($timePeriod) use ($throwTimePeriods) {
-                [$startTime1, $endTime1] = explode('-', $timePeriod);
-                foreach ($throwTimePeriods as $overlapPeriod) {
-                    [$startTime2, $endTime2] = explode('-', $overlapPeriod);
-                    if (is_time_overlap($startTime1, $endTime1, $startTime2, $endTime2)) {
-                        return false;
-                    }
-                }
-
-                return true;
-            });
-        }
-
-        // 判断各个回收时间段是否满约.
-        $recycleNumPerTime = app(ConfigService::class)->getConfig(ConfigConst::RECYCLE_GARBAGE_NUM_PER_TIME);
+        // 过滤已经满约的回收时间段，返回可预约的时间段.
+        $recycleOrderNumPerTime = app(ConfigService::class)->getConfig(GarbageRecycleConst::GARBAGE_RECYCLE_MAX_ORDERS_PER_PERIOD);
         $redis = Redis::connection('recycle');
-        return array_map(function ($period) use ($recyclerId, $recyclingDate, $recycleNumPerTime, $redis) {
-            $recyclerOrderCount = $redis->hget(RedisKeyConst::RECYCLE_RECYCLER_ORDER_COUNT_PREFIX . $recyclerId . ':' . $recyclingDate, $period);
-            return [
-                'time_period' => $period,
-                'is_full' => $recyclerOrderCount >= $recycleNumPerTime
-            ];
-        }, $allRecyclePeriod);
+        return array_filter($allRecyclePeriod, function ($period) use ($recyclingDate, $recycleOrderNumPerTime, $redis) {
+            $recyclePeriod = date('H:i', strtotime($period['start_time'])) . '-' . date('H:i', strtotime($period['end_time']));
+            $recyclerOrderCount = $redis->hget(RedisKeyConst::RECYCLE_RECYCLER_ORDER_COUNT_PREFIX . ':' . $recyclingDate, $recyclePeriod);
+            return $recyclerOrderCount < $recycleOrderNumPerTime;
+        });
     }
 
     /**
      * 创建回收订单.
      *
      * @param int $userId
-     * @param int $villageId
-     * @param int $villageFloorId
-     * @param string $address
+     * @param string $mobile
+     * @param int $addressId
      * @param string $recyclingDate
      * @param string $recyclingStartTime
      * @param string $recyclingEndTime
-     * @param string $remark
-     * @param array $recycleItems
-     *              -> int garbage_category_id
-     *              -> int garbage_type_id
-     *              -> double price
-     *              -> double pre_weight
+     * @param string $predictWeight
      *
-     * @return int 创建订单的编号
+     * @return string 创建订单的编号
      *
      */
-    public function createGarbageRecycleOrder($userId, $villageId, $villageFloorId, $address, $recyclingDate, $recyclingStartTime, $recyclingEndTime, $remark, $recycleItems)
+    public function createGarbageRecycleOrder($userId, $addressId, $recyclingDate, $recyclingStartTime, $recyclingEndTime, $remark, $recycleItems)
     {
-//        \DateTime::createFromFormat("H:i-H:i", "09:00-10:00");
         // 判断用户是否授权登录.
         if (empty($userId)) {
             throw new RestfulException('用户必须授权登录，请先授权登录！');
         }
 
-        // 查询小区是否存在.
-        $villageInfo = app(VillageService::class)->getVillageDetail($villageId, ['*', 'site.*', 'recycler.*']);
-        if (empty($villageInfo)) {
-            throw new RestfulException('该小区信息不存在，请重新选择！');
-        }
-
-        // 检查站点是否营业、是否支持回收.
-        $siteId = $villageInfo['site_id'];
-        $siteInfo = $villageInfo['site'];
-        if (empty($siteInfo['is_work']) || $siteInfo['is_work'] != GarbageSiteConst::GARBAGE_SITE_STATUS_WORKING) {
-            throw new RestfulException('该站点暂时没有营业！');
-        }
-        if (empty($siteInfo['is_recycle']) || $siteInfo['is_recycle'] != GarbageSiteConst::GARBAGE_SITE_RECYCLE_IS_SUPPORT) {
-            throw new RestfulException('该站点暂不支持回收！');
-        }
-
-        // 检查代仍日期是否是站点支持的.
-        $siteWorkTimeSlots = json_decode($siteInfo['work_time_slot'], true);
-        if (!in_array(date('w', strtotime($recyclingDate)), $siteWorkTimeSlots)) {
-            throw new RestfulException('抱歉，站点在您选择的回收日期不营业！');
-        }
-
-        // 判断用户选择的小区是否开启支持回收.
-        if ($villageInfo['is_recycle'] != VillageConst::RECYCLE_IS_SUPPORTED) {
-            throw new RestfulException('抱歉，该小区目前暂未开通回收服务，请耐心期待！');
-        }
-
-        // 判断有没有填写回收垃圾.
-        if (empty($recycleItems)) {
-            throw new RestfulException('必须添加回收垃圾！');
+        // 查询地址是否存在.
+        $addressInfo = app(AddressService::class)->getAddressDetail($addressId);
+        if (empty($addressInfo)) {
+            throw new RestfulException('该地址信息不存在，请重新选择！');
         }
 
         // 检验回收垃圾合法性.
         $garbageTotalAmount = 0.00;// 订单总额（预估，待回收员确认的时候再修改）
-        foreach ($recycleItems as $recycleItem) {
-            $garbageCategoryId = $recycleItem['garbage_category_id'];
-            $garbageTypeId = $recycleItem['garbage_type_id'];
-            $garbagePrice = $recycleItem['price'];
-            $garbagePreWeight = $recycleItem['pre_weight'];
-            $garbageTotalAmount += bcmul($garbagePrice, $garbagePreWeight);
-            $garbageType = app(GarbageTypeService::class)->getGarbageTypeList(
-                ['id' => $garbageTypeId, 'category_id' => $garbageCategoryId], ['id'], ['id' => 'asc'], 1, 1, false
-            );
-            if (empty($garbageType)) {
-                throw new RestfulException('对应的垃圾分类不存在，请重新选择！');
-            }
-        }
 
         // 判断用户选择的日期和时间是否合理，且日期否为是今天、明天后天中的一天.
         if (strtotime($recyclingDate . ' ' . $recyclingStartTime) <= time()) {
@@ -175,7 +108,7 @@ class GarbageRecycleOrderService
         }
 
         // 判断用户选择的时间段是否已经达到每小时回收单数极限值.
-        $recyclerId = $villageInfo['recycler']['id'];
+        $recyclerId = $addressInfo['recycler']['id'];
 
         // 每个小区只对应一个回收员，该回收员该小时区间时间段内的订单量不能超过12.
         $recycleNumPerTime = app(ConfigService::class)->getConfig(ConfigConst::RECYCLE_GARBAGE_NUM_PER_TIME);
@@ -191,11 +124,7 @@ class GarbageRecycleOrderService
         $garbageRecycleOrderData = [
             'order_no' => $orderNo,
             'user_id' => $userId,
-            'recycler_id' => $recyclerId,
-            'site_id' => $siteId,
-            'village_id' => $villageId,
-            'village_floor_id' => $villageFloorId,
-            'address' => $address,
+            'address_id' => $addressId,
             'status' => $orderStatus,
             'recycling_start_time' => $recyclingDate . ' ' . $recyclingStartTime,
             'recycling_end_time' => $recyclingDate . ' ' . $recyclingEndTime,
@@ -217,15 +146,11 @@ class GarbageRecycleOrderService
         DB::transaction(function () use ($garbageRecycleOrderData, $garbageRecycleOrderItemsData) {
             // 生成回收主订单记录.
             app(GarbageRecycleOrderDto::class)->createRecycleOrder($garbageRecycleOrderData);
-
-            // 生成回收订单明细记录.
-            app(GarbageRecycleOrderItemsDto::class)->createRecycleOrderItems($garbageRecycleOrderItemsData);
         });
 
         // 订单创建成功，发起异步事件.
         event(new GarbageRecycleOrderCreateEvent([
             'order_no' => $orderNo,
-            'recycler_id' => $recyclerId,
             'recycle_date' => $recyclingDate,
             'time_period' => $recyclePeriod
         ]));

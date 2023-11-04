@@ -26,6 +26,17 @@ class VillageService
     }
 
     /**
+     * 获取小区详细信息.
+     *
+     * @param $villageId int 小区ID
+     * @return mixed
+     */
+    public function getVillageInfo($villageId)
+    {
+        return VillageModel::query()->whereKey($villageId)->macroFirst();
+    }
+
+    /**
      * @param $id
      * @param $data
      * @throws \Throwable
