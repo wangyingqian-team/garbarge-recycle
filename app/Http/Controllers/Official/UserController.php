@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Official;
 use App\Services\Activity\InvitationService;
 use App\Services\Activity\NewerService;
 use App\Services\Common\WechatService;
+use App\Services\User\AddressService;
 use App\Services\User\UserAddressService;
 use App\Services\User\UserAssetsService;
 use App\Services\User\UserService;
@@ -51,7 +52,8 @@ class UserController extends BaseController
         $val = [
             'nickname' => $this->request->get('nickname'),
             'avatar' => $this->request->get('headimgurl'),
-            'mobile' => $this->request->get('mobile')
+            'mobile' => $this->request->get('mobile'),
+            'sex' => $this->request->get('sex')
         ];
         return $this->success($userService->update($val));
     }
@@ -81,9 +83,9 @@ class UserController extends BaseController
             'address' => $this->request->get('address'),
             'is_default' => $this->request->get('is_default', false)
         ];
-        /** @var UserService $userService */
-        $userService = app(UserService::class);
-        $userService->createAddress($this->userId, $data);
+        /** @var AddressService $addressService */
+        $addressService = app(AddressService::class);
+        $addressService->createAddress($this->userId, $data);
 
         return $this->success();
     }
@@ -105,9 +107,9 @@ class UserController extends BaseController
             'is_default' => $this->request->get('is_default', false)
         ];
 
-        /** @var UserService $userService */
-        $userService = app(UserService::class);
-        $userService->updateAddress($this->userId, $data);
+        /** @var AddressService $addressService */
+        $addressService = app(AddressService::class);
+        $addressService->createAddress($this->userId, $data);
 
         return $this->success();
     }
@@ -120,21 +122,21 @@ class UserController extends BaseController
     public function deleteAddress()
     {
         $id = $this->request->get('id');
-       app(UserService::class)->deleteAddress($id);
+       app(AddressService::class)->deleteAddress($id);
         return $this->success();
     }
 
     //获取地址列表
     public function getAddressList()
     {
-        $data = app(UserService::class)->getAddressList($this->userId);
+        $data = app(AddressService::class)->getAddressList($this->userId);
         return $this->success($data);
     }
 
     //获取地址详情
     public function getAddressDetail()
     {
-        $data = app(UserService::class)->getAddressDetail($this->request->get('id'));
+        $data = app(AddressService::class)->getAddressDetail($this->request->get('id'));
 
         return $this->success($data);
     }
