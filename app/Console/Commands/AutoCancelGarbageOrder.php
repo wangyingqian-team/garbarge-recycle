@@ -42,11 +42,13 @@ class AutoCancelGarbageOrder extends Command
         $timeoutOrderList = app(GarbageRecycleOrderService::class)->getGarbageRecycleOrderList([
             'appoint_end_time|>' => date("Y-m-d H:i:s"),
             'status|in' => [GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_RESERVED, GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_RECEIVED]
-        ], ['*'], ['id' => 'asc'], 1, -1);
+        ], ['*'], ['id' => 'asc'], 1, -1, false);
 
         // 自动超时取消订单
         foreach ($timeoutOrderList as $timeoutOrder) {
             app(GarbageRecycleOrderService::class)->cancelRecycleOrderBySystem($timeoutOrder['order_no']);
         }
+
+        return true;
     }
 }

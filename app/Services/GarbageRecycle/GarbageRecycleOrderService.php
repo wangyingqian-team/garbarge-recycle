@@ -2,7 +2,6 @@
 
 namespace App\Services\GarbageRecycle;
 
-use App\Dto\GarbageRecycleOrderDto;
 use App\Events\GarbageRecycleOrderCancelEvent;
 use App\Events\GarbageRecycleOrderCreateEvent;
 use App\Events\GarbageRecycleOrderFinishEvent;
@@ -433,13 +432,14 @@ class GarbageRecycleOrderService
      * @param array $orderBy
      * @param int $page $page=0时，不分页
      * @param int $pageSize
+     * @param bool $withPage
      *
      * @return mixed
      *
      */
-    public function getGarbageRecycleOrderList($where, $select, $orderBy, $page, $pageSize)
+    public function getGarbageRecycleOrderList($where, $select, $orderBy, $page, $pageSize, $withPage = true)
     {
-        $garbageRecycleOrderList = app(GarbageRecycleOrderDto::class)->getRecycleOrderList($where, $select, $orderBy, $page, $pageSize);
+        $garbageRecycleOrderList = GarbageOrderModel::query()->macroQuery($where, $select, $orderBy, $page, $pageSize, $withPage);
 
         return $garbageRecycleOrderList;
     }
