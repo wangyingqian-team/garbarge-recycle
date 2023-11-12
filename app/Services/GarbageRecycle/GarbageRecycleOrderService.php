@@ -12,6 +12,7 @@ use App\Services\Activity\CouponService;
 use App\Services\Activity\InvitationService;
 use App\Services\Common\ConfigService;
 use App\Services\User\AddressService;
+use App\Services\User\AssertService;
 use App\Services\User\UserService;
 use App\Services\User\VillageService;
 use App\Supports\Constant\ActivityConst;
@@ -338,14 +339,47 @@ class GarbageRecycleOrderService
         ]);
 
         // 补偿用户5元代金券
-        $userId = $orderInfo['user_id'];
-        app(CouponService::class)->obtainCoupon($userId, ActivityConst::COUPON_ID_5_YUAN, null);
+//        $userId = $orderInfo['user_id'];
+//        app(CouponService::class)->obtainCoupon($userId, ActivityConst::COUPON_ID_5_YUAN, null);
 
         // 发起订单取消异步事件.
         $this->pushAsyncEventForCancelRecycleOrder($orderInfo);
 
         return true;
     }
+
+    /**
+     * 用户爽约订单（回收员主动取消）.
+     *
+     * @param string $orderNo
+     *
+     * @return bool
+     *
+     */
+    public function cancelRecycleOrderByBreakPromise($orderNo)
+    {
+        // 判断用户此时是否可以操作取消.
+        $orderInfo = $this->getGarbageRecycleOrderInfo(['order_no' => $orderNo], ['*']);
+        if ($orderInfo['status'] != GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_RECEIVED) {
+            throw new RestfulException('该回收订单还未接单，不可取消！');
+        }
+
+        // 取消订单（用户爽约取消）.
+        GarbageOrderModel::query()->where(['order_no' => $orderInfo])->update([
+            'status' => GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_BREAK_PROMISE_CANCELED,
+            'cancel_time' => date("Y-m-d H:i:s", time())
+        ]);
+
+        // 扣减用户信用分.
+        $userId = $orderInfo['userId'];
+        app(AssertService::class)->decreaseCredit($userId, 10);
+
+        // 发起订单取消异步事件.
+        $this->pushAsyncEventForCancelRecycleOrder($orderInfo);
+
+        return true;
+    }
+
 
     /**
      * 系统取消回收订单（回收员上门超时取消）.
@@ -369,8 +403,8 @@ class GarbageRecycleOrderService
         ]);
 
         // 补偿用户5元代金券
-        $userId = $orderInfo['user_id'];
-        app(CouponService::class)->obtainCoupon($userId, ActivityConst::COUPON_ID_5_YUAN, null);
+//        $userId = $orderInfo['user_id'];
+//        app(CouponService::class)->obtainCoupon($userId, ActivityConst::COUPON_ID_5_YUAN, null);
 
         // 发起订单取消异步事件.
         $this->pushAsyncEventForCancelRecycleOrder($orderInfo);

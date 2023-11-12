@@ -76,5 +76,10 @@ class RedisKeyConst
      */
     const RECYCLE_NOTICE_RECYCLER = 'recycle:notice:recycler';
 
+    /**
+     * 用户收益key.
+     */
+    const USER_INCOME = 'user_income';
+
 
 }

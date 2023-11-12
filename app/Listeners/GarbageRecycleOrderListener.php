@@ -68,15 +68,20 @@ class GarbageRecycleOrderListener
         $orderNo = $data['order_no'];
         $userId = $data['user_id'];
         $recycleAmount = $data['recycle_amount'];
+        $totalAmount = $data['total_amount'];
         app(AssertService::class)->increaseJifen($userId, $recycleAmount * ActivityConst::JIFEN_EXCHANGE_AMOUNT);
 
         // 分佣关系：如果有的话，生成绿豆
         $invitationInfo = app(InvitationService::class)->getUserInvitation($userId);
         if (!empty($invitationInfo)) {
             $superiorUserId = $invitationInfo['superior_id'];
-            $beanNum = 1;// todo: 补充绿豆计算规则
-            app(InvitationService::class)->getBean($superiorUserId, $orderNo, $beanNum);
+            app(InvitationService::class)->getBean($superiorUserId, $orderNo, $recycleAmount);
         }
+
+        // redis 更新用户收益
+        $redis = Redis::connection('recycle');
+        $userIncomeKey = RedisKeyConst::USER_INCOME;
+        $redis->hincrby($userIncomeKey, $userId, $totalAmount);
 
         // 生成一条通知消息记录
         app(GarbageRecycleOrderService::class)->generateNoticeRecord($userId, $orderNo);
