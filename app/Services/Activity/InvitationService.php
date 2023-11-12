@@ -52,6 +52,17 @@ class InvitationService
     }
 
     /**
+     * 获取指定用户的邀请关系.
+     *
+     * @param $userId
+     * @return mixed
+     */
+    public function getUserInvitation($userId)
+    {
+        return InvitationRelationModel::query()->macroWhere(['user_id', $userId])->macroSelect(["*"])->macroFirst();
+    }
+
+    /**
      * 获得绿豆
      *
      * @param $userId

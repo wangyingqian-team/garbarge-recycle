@@ -29,4 +29,13 @@ class ActivityConst
         30,
         50
     ];
+
+    // 绿豆提现比例（一个绿豆一分钱）
+    const BEAN_WITHDRAW_RATIO = 0.01;
+
+    // 5元代金券 优惠券ID
+    const COUPON_ID_5_YUAN = 12;
+
+    // 积分兑换比例（支付1元兑换100积分）
+    const JIFEN_EXCHANGE_AMOUNT = 100;
 }

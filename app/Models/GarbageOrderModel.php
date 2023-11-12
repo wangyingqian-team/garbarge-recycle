@@ -18,6 +18,10 @@ class GarbageOrderModel extends Model
         return GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_MAP[$this->attributes['status']];
     }
 
+    protected $casts = [
+        'promotion_info' => 'array'
+    ];
+
     public function user()
     {
         return $this->hasOne(UserModel::class, 'id', 'user_id');

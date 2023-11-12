@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Events\GarbageRecycleOrderCancelEvent;
 use App\Events\GarbageRecycleOrderCreateEvent;
+use App\Events\GarbageRecycleOrderFinishEvent;
 use App\Events\JifenOrderCreateEvent;
 use App\Events\UserRegisterEvent;
 
@@ -20,6 +21,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         GarbageRecycleOrderCancelEvent::class => [
             GarbageRecycleOrderListener::class . '@cancelRecycleOrder'
+        ],
+        GarbageRecycleOrderFinishEvent::class => [
+            GarbageRecycleOrderListener::class  . '@finishRecycleOrder'
         ]
     ];
 

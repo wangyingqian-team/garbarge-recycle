@@ -4,6 +4,11 @@ namespace App\Listeners;
 
 use App\Events\GarbageRecycleOrderCancelEvent;
 use App\Events\GarbageRecycleOrderCreateEvent;
+use App\Events\GarbageRecycleOrderFinishEvent;
+use App\Services\Activity\InvitationService;
+use App\Services\GarbageRecycle\GarbageRecycleOrderService;
+use App\Services\User\AssertService;
+use App\Supports\Constant\ActivityConst;
 use App\Supports\Constant\RedisKeyConst;
 use Illuminate\Support\Facades\Redis;
 
@@ -26,12 +31,11 @@ class GarbageRecycleOrderListener
         $reservedOrderCountKey = RedisKeyConst::RECYCLE_RESERVED_ORDER_COUNT_TODAY;
         $redis->incr($reservedOrderCountKey);
 
-        // 指定回收员在指定时间段的回收单数+1（Redis实现，注意如果用户取消或系统取消需要回退对应的数量）
-        $recyclerId = $data['recycler_id'];
-        $throwDate = $data['recycle_date'];
-        $timePeriod = $data['time_period'];
-        $recyclerRecycleCountKey = RedisKeyConst::RECYCLE_RECYCLER_ORDER_COUNT_PREFIX . $recyclerId . ':' . $throwDate;
-        $redis->hincrby($recyclerRecycleCountKey, $timePeriod, 1);
+        // 回收员在指定时间段的回收单数+1（Redis实现，注意如果用户取消或系统取消需要回退对应的数量）
+        $recyclingDate = $data['recycle_date'];
+        $recyclePeriod = $data['recycle_period'];
+        $recyclerOrderPeriodCountKey = RedisKeyConst::THROW_RECYCLER_ORDER_COUNT_PREFIX . ':' . $recyclingDate;
+        $redis->hincrby($recyclerOrderPeriodCountKey, $recyclePeriod, 1);
     }
 
     /**
@@ -43,13 +47,38 @@ class GarbageRecycleOrderListener
     {
         $data = $event->data;
 
-        $recyclerId = $data['recycler_id'];
-        $throwDate = $data['recycle_date'];
-        $timePeriod = $data['time_period'];
+        $recyclingDate = $data['recycle_date'];
+        $recyclePeriod = $data['recycle_period'];
 
         // 指定回收员在指定时间段的回收单数-1
         $redis = Redis::connection('recycle');
-        $recyclerThrowCountKey = RedisKeyConst::RECYCLE_RECYCLER_ORDER_COUNT_PREFIX . $recyclerId . ':' . $throwDate;
-        $redis->hincrby($recyclerThrowCountKey, $timePeriod, -1);
+        $recyclerOrderPeriodCountKey = RedisKeyConst::THROW_RECYCLER_ORDER_COUNT_PREFIX . ':' . $recyclingDate;
+        $redis->hincrby($recyclerOrderPeriodCountKey, $recyclePeriod, -1);
+
+        // todo 修改优惠券状态
+    }
+
+    public function finishRecycleOrder(GarbageRecycleOrderFinishEvent $event)
+    {
+        $data = $event->data;
+
+        // todo：订单完成后Redis里面存放公告信息(xxx在xxx完成，事先清除该userId的信息再添加，Redis里面保证只有userId不重复的20条数据)
+
+        // 订单积分计算
+        $orderNo = $data['order_no'];
+        $userId = $data['user_id'];
+        $recycleAmount = $data['recycle_amount'];
+        app(AssertService::class)->increaseJifen($userId, $recycleAmount * ActivityConst::JIFEN_EXCHANGE_AMOUNT);
+
+        // 分佣关系：如果有的话，生成绿豆
+        $invitationInfo = app(InvitationService::class)->getUserInvitation($userId);
+        if (!empty($invitationInfo)) {
+            $superiorUserId = $invitationInfo['superior_id'];
+            $beanNum = 1;// todo: 补充绿豆计算规则
+            app(InvitationService::class)->getBean($superiorUserId, $orderNo, $beanNum);
+        }
+
+        // 生成一条通知消息记录
+        app(GarbageRecycleOrderService::class)->generateNoticeRecord($userId, $orderNo);
     }
 }

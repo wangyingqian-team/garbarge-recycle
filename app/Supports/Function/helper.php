@@ -132,19 +132,18 @@ if (!function_exists('generate_order_no')) {
     /**
      * 生成订单号.
      *
-     * @param int $userId
      * @param string $prefix
      * @return string order no
      */
-    function generate_order_no($userId, $prefix)
+    function generate_order_no($prefix)
     {
-        $rand = rand(100, 999);
+        $dateStr = Carbon::now()->format("ymd");
 
-        $userId = str_pad($userId, 6, '0', STR_PAD_LEFT);
+        $timeStr = substr(time(), -4);
 
-        $timeStamp = Carbon::now()->format("YmdHis");
+        $rand = rand(1000, 9999);
 
-        return $prefix . $timeStamp . $userId . $rand;
+        return $prefix . $dateStr . $timeStr . $rand;
     }
 }
 

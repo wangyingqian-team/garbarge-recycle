@@ -2,6 +2,8 @@
 
 namespace App\Console;
 
+use App\Console\Commands\AutoAddRecycleNotice;
+use App\Console\Commands\AutoCancelGarbageOrder;
 use App\Console\Commands\AutoCheckInvitationActive;
 use App\Console\Commands\AutoClearSign;
 use App\Console\Commands\CouponExpire;
@@ -23,6 +25,8 @@ class Kernel extends ConsoleKernel
         CouponExpire::class,
         SettleCredit::class,
         NewerExpire::class,
+        AutoAddRecycleNotice::class,
+        AutoCancelGarbageOrder::class
     ];
 
     /**
@@ -42,6 +46,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('garbage:newer_expire')->dailyAt('22:00');
 
         $schedule->command('garbage:clear_sign')->dailyAt('23:59');
+
+        $schedule->command('garbage:user_notice_add')->cron('0 9-18 * * *');
+
+        $schedule->command('garbage:recycle_timeout_cancel')->cron('0 * * * *');
 
     }
 

@@ -66,4 +66,15 @@ class RedisKeyConst
      */
     const RECYCLE_RECYCLER_ORDER_COUNT_PREFIX = 'recycle:recyclerOrderCount:';
 
+    /**
+     * 用户回收通知信息Key.
+     */
+    const RECYCLE_NOTICE_USER = 'recycle:notice:user';
+
+    /**
+     * 回收员回收通知信息Key.
+     */
+    const RECYCLE_NOTICE_RECYCLER = 'recycle:notice:recycler';
+
+
 }

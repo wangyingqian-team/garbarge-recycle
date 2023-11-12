@@ -82,4 +82,22 @@ class GarbageRecycleConst
         self::GARBAGE_RECYCLE_ORDER_STATUS_BREAK_PROMISE_CANCELED => '已取消（用户爽约取消）',
         self::GARBAGE_RECYCLE_ORDER_STATUS_TIMEOUT_CANCELED => '已取消（回收员上门超时取消）'
     ];
+
+    /**
+     * 进行中（未完成）的订单状态枚举
+     */
+    const GARBAGE_RECYCLE_ORDER_STATUS_ONGOING = [
+        self::GARBAGE_RECYCLE_ORDER_STATUS_RESERVED,
+        self::GARBAGE_RECYCLE_ORDER_STATUS_RECEIVED,
+        self::GARBAGE_RECYCLE_ORDER_STATUS_RECYCLING
+    ];
+
+    /**
+     * 判断订单是否为进行中订单
+     * @param $orderStatus int 订单状态
+     * @return bool 判断结果
+     */
+    public static function isOrderOnGoing($orderStatus) {
+        return in_array($orderStatus, self::GARBAGE_RECYCLE_ORDER_STATUS_ONGOING);
+    }
 }
