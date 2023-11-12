@@ -223,25 +223,30 @@ class GarbageRecycleOrderService
         $promotionInfo = $orderInfo['promotion_info'];
 
         // 订单绿豆逻辑
+        $beanAmount = 0;
         if (!empty($promotionInfo['bean_num'])) {
             // 扣减绿豆
             app(InvitationService::class)->costBean($userId, $orderNo, $promotionInfo['bean_num']);
             app(InvitationService::class)->consumeBean($orderInfo);
 
             // 增加交易额
-            $totalAmount = bcadd($totalAmount, $promotionInfo['bean_num'] * ActivityConst::BEAN_WITHDRAW_RATIO, 2);
+            $beanAmount = $promotionInfo['bean_num'] * ActivityConst::BEAN_WITHDRAW_RATIO;
+            $totalAmount = bcadd($totalAmount, $beanAmount, 2);
         }
 
         // 订单代金券逻辑
+        $voucherCouponAmount = 0;
         if (!empty($promotionInfo['voucher_coupon_id'])) {
             // 使用代金券
             app(CouponService::class)->useCoupon($userId, $promotionInfo['voucher_coupon_id'], $orderNo);
             // 增加交易额
             $voucherCouponInfo = app(CouponService::class)->getCouponDetail($promotionInfo['voucher_coupon_id']);
-            $totalAmount = bcadd($totalAmount, $voucherCouponInfo['amount'], 2);
+            $voucherCouponAmount = $voucherCouponInfo['amount'];
+            $totalAmount = bcadd($totalAmount, $voucherCouponAmount, 2);
         }
 
         // 订单膨胀券逻辑
+        $expandCouponAmount = 0;
         if (!empty($promotionInfo['expand_coupon_id'])) {
             // 使用膨胀券
             app(CouponService::class)->useCoupon($userId, $promotionInfo['expand_coupon_id'], $orderNo);
@@ -249,17 +254,21 @@ class GarbageRecycleOrderService
             // 计算膨胀金额
             $expandCouponInfo = app(CouponService::class)->getCouponDetail($promotionInfo['expand_coupon_id']);
             $expandTimes = $this->getExpandTimes($promotionInfo['expand_coupon_id']);
-            $expandAmount = $recycleAmount * $expandTimes;
+            $expandCouponAmount = $recycleAmount * $expandTimes;
             if ($recycleAmount > $expandCouponInfo['amount']) {
-                $expandAmount = $expandCouponInfo['amount'];
+                $expandCouponAmount = $expandCouponInfo['amount'];
             }
 
             // 增加交易金额
-            $totalAmount = bcadd($totalAmount, $expandAmount, 2);
+            $totalAmount = bcadd($totalAmount, $expandCouponAmount, 2);
         }
 
         // 注意：话费券和物品兑换券，需要在订单完成的时候，回收员当场给与兑换.
+        $phoneCouponAmount = 0;
         if (!empty($promotionInfo['phone_coupon_id'])) {
+            // 增加交易金额
+            $phoneCouponAmount = $this->getChargeAmount($promotionInfo['phone_coupon_id']);
+            $totalAmount = bcadd($totalAmount, $phoneCouponAmount, 2);
             app(CouponService::class)->useCoupon($userId, $promotionInfo['phone_coupon_id'], $orderNo);
         }
         if (!empty($promotionInfo['exchange_coupon_id'])) {
@@ -271,6 +280,10 @@ class GarbageRecycleOrderService
             'status' => GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_FINISHED,
             'actual_weight' => $actualWeight,
             'total_amount' => $totalAmount,
+            'bean_amount' => $beanAmount,
+            'voucher_coupon_amount' => $voucherCouponAmount,
+            'expand_coupon_amount' => $expandCouponAmount,
+            'phone_coupon_amount' => $phoneCouponAmount,
             'finish_time' => date("Y-m-d H:i:s", time())
         ]);
 
@@ -492,16 +505,44 @@ class GarbageRecycleOrderService
         $expandTimes = 1;
         switch ($expandCouponId) {
             case 6:
-                return 1.1;
+                $expandTimes = 1.1;
+                break;
             case 7:
-                return 1.2;
+                $expandTimes = 1.2;
+                break;
             case 8:
-                return 1.3;
+                $expandTimes = 1.3;
+                break;
             case 9:
-                return 1.4;
+                $expandTimes = 1.4;
+                break;
             case 10:
-                return 1.5;
+                $expandTimes = 1.5;
+                break;
         }
         return $expandTimes;
+    }
+
+    // 话费券 充值金额获取
+    private function getChargeAmount($phoneCouponId) {
+        $chargeAmount = 0;
+        switch ($phoneCouponId) {
+            case 1:
+                $chargeAmount = 10;
+                break;
+            case 2:
+                $chargeAmount = 20;
+                break;
+            case 3:
+                $chargeAmount = 30;
+                break;
+            case 4:
+                $chargeAmount = 50;
+                break;
+            case 5:
+                $chargeAmount = 100;
+                break;
+        }
+        return $chargeAmount;
     }
 }
