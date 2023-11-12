@@ -51,6 +51,7 @@ class UserService
             'nickname' => $data['nickname'] ?? '',
             'avatar' => $data['headimgurl'] ?? '',
             'mobile' => $data['mobile'] ?? '',
+            'sex' => $data['sex'] ?? '',
         ];
 
         return UserModel::query()->where('user_id', $data['user_id'])->update($val);

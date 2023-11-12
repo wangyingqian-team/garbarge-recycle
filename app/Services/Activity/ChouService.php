@@ -30,9 +30,9 @@ class ChouService
 
 
     //概率和奖品   优惠券30天有效
-    const JIANG_PIN = [//概率 => 奖品
+    const JIANG_PIN = [//概率 => 奖品  10%不中奖
         //积分
-        'ji_fen' => [ //90%
+        'ji_fen' => [ //80%
             5 => 10,
             10 => 20,
             20 => 30,
@@ -69,10 +69,18 @@ class ChouService
      *
      * @param $userId
      * @param int $jifen
-     * @return bool
+     *
      */
     public function chou($userId,  $jifen = 0)
     {
+        $r = [
+            'is_hit' => false,
+            'prize' => [
+                'type' => '',
+                'num' => ''
+            ],
+        ];
+
         //redis 记录抽奖次数
         $redis = Redis::connection('activity');
         $b = (bool)$redis->hget('chou_jiang', $userId);
@@ -96,24 +104,36 @@ class ChouService
                 $t = Carbon::today()->addDays(30)->timestamp;
                 $r1= mt_rand(1, 100);
                 $r2 = mt_rand(1, 100);
-                if ($r1 <= 90) {
+                if ($r1 <= 80) {
                     foreach (self::JIANG_PIN['ji_fen'] as $k => $v) {
                         if ($k >= $r2) {
                             $jifen += $v;
+                            $r['prize'] = [
+                                'type' => 'ji_fen',
+                                'num' => $v
+                            ];
                             break;
                         }
                     }
                     UserAssetsModel::query()->where('user_id', $userId)->update(['jifen' => $jifen]);
-                }elseif ($r1 <= 95) {
+                }elseif ($r1 <= 85) {
                     foreach (self::JIANG_PIN['hua_fei'] as $k => $v) {
                         if ($k >= $r2) {
                             $couponService->obtainCoupon($userId, $v, $t);
+                            $r['prize'] = [
+                                'type' => 'hua_fei',
+                                'num' => $v
+                            ];
                             break;
                         }
                     }
-                }else{
+                }elseif($r1 <=90){
                     foreach (self::JIANG_PIN['peng_zhang'] as $k => $v) {
                         if ($k >= $r2) {
+                            $r['prize'] = [
+                                'type' => 'peng_zhang',
+                                'num' => $v
+                            ];
                             $couponService->obtainCoupon($userId, $v, $t);
                             break;
                         }
@@ -129,6 +149,6 @@ class ChouService
 
         $redis->hincrby('chou_jiang', $userId, 1);
 
-        return true;
+        return $r;
     }
 }
