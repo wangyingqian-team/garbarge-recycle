@@ -88,9 +88,6 @@ Route::get('village/list', 'UserController@getNearVillageList');
 // 获取垃圾分类与价格
 Route::get('recycle/garbageType/price', 'GarbageRecycleController@getGarbageTypePriceList');
 
-// 获取常用垃圾分类
-Route::get('recycle/garbage/popular/types', 'GarbageRecycleController@getPopularGarbageTypes');
-
 // 选择可回收的时间段列表
 Route::get('recycle/timePeriod/list', 'GarbageRecycleController@getRecycleTimePeriodList');
 

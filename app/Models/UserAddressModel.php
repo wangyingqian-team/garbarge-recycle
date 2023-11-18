@@ -8,7 +8,7 @@
 
 namespace App\Models;
 
-use App\Services\Village\VillageService;
+use App\Services\User\VillageService;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -23,17 +23,11 @@ class UserAddressModel extends Model
 
     public $timestamps = false;
 
-    protected $appends = ['village_name', 'village_floor_name'];
+    protected $appends = ['village_name'];
 
     public function getVillageNameAttribute()
     {
         $villageId = $this->attributes['village_id'];
-        return app(VillageService::class)->getVillageDetail($villageId)['name'];
-    }
-
-    public function getVillageFloorNameAttribute()
-    {
-        $villageFloorId = $this->attributes['village_floor_id'];
-        return app(VillageService::class)->getVillageFloorDetail($villageFloorId)['floor'];
+        return app(VillageService::class)->getVillageInfo($villageId)['name'];
     }
 }

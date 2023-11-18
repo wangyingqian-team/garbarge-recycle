@@ -2,63 +2,90 @@
 
 namespace App\Services\JifenShop;
 
-use App\Dto\JifenOrderDto;
 use App\Events\JifenOrderCreateEvent;
 use App\Exceptions\RestfulException;
-use App\Services\User\UserAssetsService;
+use App\Models\JifenOrderModel;
+use App\Services\Activity\CouponService;
+use App\Services\User\AssertService;
 use App\Services\User\UserService;
-use App\Supports\Constant\ AssertConst;
+use App\Supports\Constant\AssertConst;
+use App\Supports\Constant\JiFenConst;
 use Illuminate\Support\Facades\DB;
 
 class JifenOrderService
 {
-    /** @var JifenOrderDto */
-    public $dto;
-
-    public function __construct()
-    {
-        $this->dto = app(JifenOrderDto::class);
-    }
-
-
     /**
+     * 积分兑换下单.
+     *
      * @param $userId
      * @param $itemId
      * @param $num
-     * @param $jifen
      * @return bool
      * @throws \Throwable
      */
-    public function create($userId, $itemId, $num, $jifen, $deliveryType)
+    public function create($userId, $itemId, $num)
     {
-        $userAssets = app(UserAssetsService::class)->getUserAssets($userId);
+        $item = app(JifenItemService::class)->getItemInfo($itemId);
+        if (empty($item)) {
+            throw new RestfulException('商品信息不存在，请重新兑换！');
+        }
 
-        if ($userAssets['jifen'] < $jifen) {
+        $jifenNeed = $item['jifen_need'];
+        $jifenCost = $num * $jifenNeed;
+        $userInfo = app(UserService::class)->getUserDetail($userId);
+        if ($userInfo['asserts']['jifen'] < $jifenCost) {
             throw new RestfulException('用户积分不足');
         }
 
-        $item = app(JifenItemService::class)->getItemInfoById($itemId, false);
         $iData = [
-            'order_no' => generate_order_no($userId,  AssertConst::JI_FEN_ORDER_PREFIX),
+            'order_no' => generate_order_no('E'),
             'user_id' => $userId,
             'title' => $item['title'],
-            'image' => $item['primary_image'],
-            'jifen_need' => $item['jifen_need'],
+            'jifen_need' => $jifenNeed,
             'num' => $num,
-            'delivery_type' => $deliveryType,
-            'jifen_cost' => $jifen,
-            'status' =>  AssertConst::JI_FEN_ORDER_WAIT_STATUS,
-            'remark' => ''
+            'jifen_cost' => $jifenCost,
+            'status' =>  JiFenConst::JI_FEN_ORDER_STATUS_EXCHANGED
         ];
 
         DB::transaction(function () use($iData, $itemId) {
-            $this->dto->create($iData);
-            //扣减积分
-            app(UserAssetsService::class)->changeUserJifen($iData['user_id'], $iData['jifen_cost'], false);
+            // 添加积分兑换订单.
+            JifenOrderModel::query()->insert($iData);
+            // 扣减积分.
+            app(AssertService::class)->decreaseJifen($iData['user_id'], $iData['jifen_cost']);
+            // 发放兑换券.todo
+            app(CouponService::class)->obtainCoupon($iData['user_id'], null, null);
         });
 
 
         event(new JifenOrderCreateEvent($iData));
+
+        return true;
+    }
+
+    /**
+     * 积分兑换订单兑现.
+     *
+     * @param $orderNo string 商城订单号
+     * @param $garbageOrderNo string 回收订单号
+     * @return bool
+     */
+    public function exchangeJiFenOrder($orderNo, $garbageOrderNo)
+    {
+        // 检查订单状态
+        $exchangeOrderInfo = $this->getOrderDetail($orderNo);
+        if (empty($exchangeOrderInfo)) {
+            throw new RestfulException('该兑换订单不存在，请稍后重试！');
+        }
+
+        if ($exchangeOrderInfo['status'] != JiFenConst::JI_FEN_ORDER_STATUS_UN_EXCHANGED) {
+            throw new RestfulException('该订单已经兑换，请勿重复兑换！');
+        }
+
+        // 更新订单状态.
+        JifenOrderModel::query()->where('order_no', $orderNo)->update([
+            'status' => JiFenConst::JI_FEN_ORDER_STATUS_EXCHANGED,
+            'garbage_order_no' => $garbageOrderNo
+        ]);
 
         return true;
     }
@@ -76,9 +103,7 @@ class JifenOrderService
      */
     public function getOrderListWithPage($where = [], $select = ['*'], $orderBy = [], $page = 0, $limit = 0, $withPage = true)
     {
-        $list = $this->dto->getOrderList($where, $select, $orderBy, $page, $limit, $withPage);
-
-        return batch_set_oss_url($list, 'image');
+        return JifenOrderModel::query()->macroQuery($where, $select, $orderBy, $page, $limit, $withPage);
     }
 
     /**
@@ -89,8 +114,7 @@ class JifenOrderService
      */
     public function getOrderDetail($orderNo)
     {
-        $detail = $this->dto->getOrderDetail($orderNo);
-        $detail['image'] = set_oss_url($detail['image']);
+        $detail = JifenOrderModel::query()->where('order_no', $orderNo)->macroFirst();
         return $detail;
     }
 

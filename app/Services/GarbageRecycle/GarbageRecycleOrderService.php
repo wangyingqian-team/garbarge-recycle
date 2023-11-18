@@ -10,54 +10,54 @@ use App\Models\GarbageOrderModel;
 use App\Services\Activity\CouponService;
 use App\Services\Activity\InvitationService;
 use App\Services\Common\ConfigService;
+use App\Services\JifenShop\JifenOrderService;
 use App\Services\User\AddressService;
 use App\Services\User\AssertService;
 use App\Services\User\UserService;
-use App\Services\User\VillageService;
 use App\Supports\Constant\ActivityConst;
 use App\Supports\Constant\GarbageRecycleConst;
 use App\Supports\Constant\RedisKeyConst;
-use App\Supports\Constant\UserConst;
 use Illuminate\Support\Facades\Redis;
 
 class GarbageRecycleOrderService
 {
     /**
-     * 查询指定小区的可回收时间段列表.
-     *
-     * @param string $recyclingDate
-     * @param int $villageId
+     * 查询可回收时间段列表.
      *
      * @return mixed
      */
-    public function getRecycleTimePeriodList($recyclingDate, $villageId)
+    public function getRecycleTimePeriodList()
     {
-        // 判断用户选择的小区是否开放.
-        $villageInfo = app(VillageService::class)->getVillageInfo($villageId);
-        if (empty($villageInfo)) {
-            throw new RestfulException('该小区信息不存在，请重新选择！');
-        }
-
-        if ($villageInfo['is_active'] == UserConst::VILLAGE_STATUS_INACTIVE) {
-            throw new RestfulException('抱歉，该小区目前暂未开通回收服务，请耐心期待！');
-        }
-
-        // 查询所有支持的回收时间段.
+        // 查询未来一周内所有支持的回收时间段.
         $allRecyclePeriod = app(ConfigService::class)->getConfig(GarbageRecycleConst::GARBAGE_RECYCLE_APPOINT_PERIOD);
 
         // 过滤已经满约的回收时间段，返回可预约的时间段.
-        // 预约已满的时间段，显示一下
+        // 预约已满的时间段，显示为已约满.
         $recycleOrderNumPerTime = app(ConfigService::class)->getConfig(GarbageRecycleConst::GARBAGE_RECYCLE_MAX_ORDERS_PER_PERIOD);
         $redis = Redis::connection('recycle');
-        return array_map(function ($period) use ($recyclingDate, $recycleOrderNumPerTime, $redis) {
-            $recyclePeriod = date('H:i', strtotime($period['start_time'])) . '-' . date('H:i', strtotime($period['end_time']));
-            $recyclerOrderCount = $redis->hget(RedisKeyConst::RECYCLE_RECYCLER_ORDER_COUNT_PREFIX . ':' . $recyclingDate, $recyclePeriod);
-            return [
-                'time_period' => $recyclePeriod,
-                'is_full' => $recyclerOrderCount >= $recycleOrderNumPerTime
-            ];
-        }, $allRecyclePeriod);
+        $allRecycleDates = [
+            date('Y-m-d', strtotime('+1 day')),
+            date('Y-m-d', strtotime('+2 day')),
+            date('Y-m-d', strtotime('+3 day')),
+            date('Y-m-d', strtotime('+4 day')),
+            date('Y-m-d', strtotime('+5 day')),
+            date('Y-m-d', strtotime('+6 day')),
+            date('Y-m-d', strtotime('+7 day')),
+        ];
+        $recycleTimePeriodList = [];
 
+        foreach ($allRecycleDates as $recyclingDate) {
+            $recycleTimePeriodList[$recyclingDate] = array_map(function ($period) use ($recyclingDate, $recycleOrderNumPerTime, $redis) {
+                $recyclePeriod = date('H:i', strtotime($period['start_time'])) . '-' . date('H:i', strtotime($period['end_time']));
+                $recyclerOrderCount = $redis->hget(RedisKeyConst::RECYCLE_RECYCLER_ORDER_COUNT_PREFIX . ':' . $recyclingDate, $recyclePeriod);
+                return [
+                    'time_period' => $recyclePeriod,
+                    'is_full' => $recyclerOrderCount >= $recycleOrderNumPerTime
+                ];
+            }, $allRecyclePeriod);
+        }
+
+        return $recycleTimePeriodList;
     }
 
     /**
@@ -72,9 +72,10 @@ class GarbageRecycleOrderService
      * @param array $promotion
      *              -> bean_num: 绿豆使用数量
      *              -> voucher_coupon_id: 代金券id
-     *              -> exchange_coupon_id: 物品兑换券id
      *              -> phone_coupon_id: 话费券id
      *              -> expand_coupon_id: 膨胀券id
+     *              -> exchange_order_no: 物品兑换订单号
+     *              -> exchange_coupon_id: 兑换券id
      *
      * @return string 创建订单的编号
      *
@@ -270,7 +271,11 @@ class GarbageRecycleOrderService
             $totalAmount = bcadd($totalAmount, $phoneCouponAmount, 2);
             app(CouponService::class)->useCoupon($userId, $promotionInfo['phone_coupon_id'], $orderNo);
         }
-        if (!empty($promotionInfo['exchange_coupon_id'])) {
+        if (!empty($promotionInfo['exchange_order_no']) && !empty($promotionInfo['exchange_coupon_id'])) {
+            // 更新兑换订单表的回收订单号
+            app(JifenOrderService::class)->exchangeJiFenOrder($promotionInfo['exchange_order_no'], $orderNo);
+
+            // 使用卡券.
             app(CouponService::class)->useCoupon($userId, $promotionInfo['exchange_coupon_id'], $orderNo);
         }
 

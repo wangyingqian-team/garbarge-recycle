@@ -4,8 +4,6 @@ namespace App\Http\Controllers\Official;
 
 use App\Services\GarbageRecycle\GarbageCategoryService;
 use App\Services\GarbageRecycle\GarbageRecycleOrderService;
-use App\Services\GarbageRecycle\GarbageRecycleRateService;
-use App\Services\GarbageRecycle\GarbageTypeService;
 
 class GarbageRecycleController extends BaseController
 {
@@ -15,32 +13,17 @@ class GarbageRecycleController extends BaseController
      * @return mixed
      *
      */
-    public function getGarbageTypePriceList() {
-        $categoryId = $this->request->get('category_id');
-
+    public function getGarbageTypePriceList()
+    {
         $select = [
-            'id', 'name', 'create_time', 'update_time', 'type.*'
+            'id', 'name', 'order', 'create_time', 'update_time', 'type.id', 'type.category_id', 'type.unit_name',
+            'type.name', 'type.icon', 'type.recycling_price', 'type.create_time', 'type.update_time'
         ];
         $filters = [];
-        if (!empty($categoryId)) {
-            $filters['id'] = $categoryId;
-        }
-
-        $result = app(GarbageCategoryService::class)->getGarbageCategoryList($filters, $select);
-
-        return $this->success($result);
-    }
+        $orderBys = ['order' => 'asc'];
 
 
-    /**
-     * 常用垃圾分类
-     *
-     * @return mixed
-     *
-     */
-    public function getPopularGarbageTypes()
-    {
-        $result = app(GarbageTypeService::class)->getPopularGarbageTypeList(['*']);
+        $result = app(GarbageCategoryService::class)->getGarbageCategoryList($filters, $select, $orderBys);
 
         return $this->success($result);
     }
@@ -52,10 +35,7 @@ class GarbageRecycleController extends BaseController
      */
     public function getRecycleTimePeriodList()
     {
-        $recyclingDate = $this->request->get('recycling_date');
-        $villageId = $this->request->get('village_id');
-
-        $result = app(GarbageRecycleOrderService::class)->getRecycleTimePeriodList($recyclingDate, $villageId);
+        $result = app(GarbageRecycleOrderService::class)->getRecycleTimePeriodList();
 
         return $this->success($result);
     }
@@ -68,18 +48,17 @@ class GarbageRecycleController extends BaseController
      */
     public function createGarbageRecycleOrder()
     {
-        $villageId = $this->request->post('village_id');
-        $villageFloorId = $this->request->post('village_floor_id');
-        $address = $this->request->post('address');
-        $recyclingDate = $this->request->post('recycling_date');
-        $recyclingStartTime = $this->request->post('recycling_start_time');
-        $recyclingEndTime = $this->request->post('recycling_end_time');
-        $remark = $this->request->post('remark');
-        $recyclingItems = $this->request->post('recycling_items');
-        $recyclingItems = json_decode($recyclingItems, true);
+        $requestBody = $this->request->all();
+
+        $addressId = $requestBody['address_id'];
+        $recyclingDate = $requestBody['recycling_date'];
+        $recyclingStartTime = $requestBody['recycling_start_time'];
+        $recyclingEndTime = $requestBody['recycling_end_time'];
+        $predictWeight = $requestBody['predict_weight'];
+        $promotionInfo = $requestBody['promotion_info'];
 
         $result = app(GarbageRecycleOrderService::class)->createGarbageRecycleOrder(
-            $this->userId, $villageId, $villageFloorId, $address, $recyclingDate, $recyclingStartTime, $recyclingEndTime, $remark, $recyclingItems
+            $this->userId, $addressId, $recyclingDate,$recyclingStartTime, $recyclingEndTime, $predictWeight, $promotionInfo
         );
 
         return $this->success($result);
