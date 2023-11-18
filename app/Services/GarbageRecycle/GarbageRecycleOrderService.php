@@ -33,28 +33,52 @@ class GarbageRecycleOrderService
 
         // 过滤已经满约的回收时间段，返回可预约的时间段.
         // 预约已满的时间段，显示为已约满.
+        $todayDate = date('Y-m-d');
         $recycleOrderNumPerTime = app(ConfigService::class)->getConfig(GarbageRecycleConst::GARBAGE_RECYCLE_MAX_ORDERS_PER_PERIOD);
         $redis = Redis::connection('recycle');
         $allRecycleDates = [
+            $todayDate,
             date('Y-m-d', strtotime('+1 day')),
             date('Y-m-d', strtotime('+2 day')),
             date('Y-m-d', strtotime('+3 day')),
             date('Y-m-d', strtotime('+4 day')),
             date('Y-m-d', strtotime('+5 day')),
-            date('Y-m-d', strtotime('+6 day')),
-            date('Y-m-d', strtotime('+7 day')),
+            date('Y-m-d', strtotime('+6 day'))
         ];
-        $recycleTimePeriodList = [];
 
+        // 计算今天可选的时间段.
+        $todayRecyclePeriod = [];
+        foreach ($allRecyclePeriod as $period) {
+            if (strtotime($period['start_time']) - time() > 7200) {
+                $todayRecyclePeriod[] = $period;
+            }
+        }
+
+        $recycleTimePeriodList = [];
         foreach ($allRecycleDates as $recyclingDate) {
-            $recycleTimePeriodList[$recyclingDate] = array_map(function ($period) use ($recyclingDate, $recycleOrderNumPerTime, $redis) {
-                $recyclePeriod = date('H:i', strtotime($period['start_time'])) . '-' . date('H:i', strtotime($period['end_time']));
-                $recyclerOrderCount = $redis->hget(RedisKeyConst::RECYCLE_RECYCLER_ORDER_COUNT_PREFIX . ':' . $recyclingDate, $recyclePeriod);
-                return [
-                    'time_period' => $recyclePeriod,
-                    'is_full' => $recyclerOrderCount >= $recycleOrderNumPerTime
-                ];
-            }, $allRecyclePeriod);
+            if ($recyclingDate == $todayDate) {
+                if (empty($todayRecyclePeriod)) {
+                    continue;
+                }
+
+                $recycleTimePeriodList[$recyclingDate] = array_map(function ($period) use ($recyclingDate, $recycleOrderNumPerTime, $redis) {
+                    $recyclePeriod = date('H:i', strtotime($period['start_time'])) . '-' . date('H:i', strtotime($period['end_time']));
+                    $recyclerOrderCount = $redis->hget(RedisKeyConst::RECYCLE_RECYCLER_ORDER_COUNT_PREFIX . ':' . $recyclingDate, $recyclePeriod);
+                    return [
+                        'time_period' => $recyclePeriod,
+                        'is_full' => $recyclerOrderCount >= $recycleOrderNumPerTime
+                    ];
+                }, $todayRecyclePeriod);
+            } else {
+                $recycleTimePeriodList[$recyclingDate] = array_map(function ($period) use ($recyclingDate, $recycleOrderNumPerTime, $redis) {
+                    $recyclePeriod = date('H:i', strtotime($period['start_time'])) . '-' . date('H:i', strtotime($period['end_time']));
+                    $recyclerOrderCount = $redis->hget(RedisKeyConst::RECYCLE_RECYCLER_ORDER_COUNT_PREFIX . ':' . $recyclingDate, $recyclePeriod);
+                    return [
+                        'time_period' => $recyclePeriod,
+                        'is_full' => $recyclerOrderCount >= $recycleOrderNumPerTime
+                    ];
+                }, $allRecyclePeriod);
+            }
         }
 
         return $recycleTimePeriodList;
