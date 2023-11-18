@@ -8,7 +8,6 @@ use App\Models\JifenOrderModel;
 use App\Services\Activity\CouponService;
 use App\Services\User\AssertService;
 use App\Services\User\UserService;
-use App\Supports\Constant\AssertConst;
 use App\Supports\Constant\JiFenConst;
 use Illuminate\Support\Facades\DB;
 
@@ -47,13 +46,14 @@ class JifenOrderService
             'status' =>  JiFenConst::JI_FEN_ORDER_STATUS_EXCHANGED
         ];
 
-        DB::transaction(function () use($iData, $itemId) {
+        DB::transaction(function () use($iData, $itemId, $item) {
             // 添加积分兑换订单.
             JifenOrderModel::query()->insert($iData);
             // 扣减积分.
             app(AssertService::class)->decreaseJifen($iData['user_id'], $iData['jifen_cost']);
-            // 发放兑换券.todo
-            app(CouponService::class)->obtainCoupon($iData['user_id'], null, null);
+            // 发放兑换券（一年有效期）.
+            $expireTime = 365 * 24 * 3600;
+            app(CouponService::class)->obtainCoupon($iData['user_id'], $item['coupon_id'], $expireTime);
         });
 
 
