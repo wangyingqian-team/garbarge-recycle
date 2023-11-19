@@ -117,8 +117,10 @@ class GarbageRecycleOrderService
             throw new RestfulException('该地址信息不存在，请重新选择！');
         }
 
-        // 检验回收垃圾合法性.
-        $garbageTotalAmount = 0.00;// 订单总额（预估，待回收员确认的时候再修改）
+        // 回收时间必须在当前时间之后.
+        if (strtotime($recyclingDate . ' ' . $recyclingStartTime) <= time()) {
+            throw new RestfulException('回收时间必须在当前时间之后！');
+        }
 
         // 回收开始时间必须小于回收结束时间.
         if (strtotime($recyclingStartTime) >= strtotime($recyclingEndTime)) {
@@ -142,8 +144,8 @@ class GarbageRecycleOrderService
         }
 
         // 判断当前用户进行中的订单只能下一个单.
-        $checkOngoingOrder = GarbageOrderModel::query()->where('user_id', $userId)->whereIn('status', GarbageRecycleConst::GARBAGE_RECYCLE_MAX_ORDERS_PER_PERIOD);
-        if (!empty($checkOngoingOrder)) {
+        $checkOngoingOrderCount = GarbageOrderModel::query()->where('user_id', $userId)->whereIn('status', GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_ONGOING)->count(['id']);
+        if ($checkOngoingOrderCount > 0) {
             throw new RestfulException('您已经预约上门回收，不可重复预约！');
         }
 
@@ -151,6 +153,7 @@ class GarbageRecycleOrderService
         // 创建订单.
         $orderNo = generate_order_no('R');
         $orderStatus = GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_RESERVED;
+        $garbageTotalAmount = 0.00;// 订单总额（待回收员确认的时候再修改）
         $garbageRecycleOrderData = [
             'order_no' => $orderNo,
             'user_id' => $userId,

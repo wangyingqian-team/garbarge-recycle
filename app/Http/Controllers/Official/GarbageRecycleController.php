@@ -55,7 +55,7 @@ class GarbageRecycleController extends BaseController
         $recyclingStartTime = $requestBody['recycling_start_time'];
         $recyclingEndTime = $requestBody['recycling_end_time'];
         $predictWeight = $requestBody['predict_weight'];
-        $promotionInfo = $requestBody['promotion_info'];
+        $promotionInfo = $requestBody['promotion_info'] ?? [];
 
         $result = app(GarbageRecycleOrderService::class)->createGarbageRecycleOrder(
             $this->userId, $addressId, $recyclingDate,$recyclingStartTime, $recyclingEndTime, $predictWeight, $promotionInfo

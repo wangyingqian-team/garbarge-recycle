@@ -28,8 +28,8 @@ class GarbageRecycleOrderListener
 
         // 统计：今天预约的回收单数+1（Redis实现，定时任务每天凌晨清理）
         $redis = Redis::connection('recycle');
-        $reservedOrderCountKey = RedisKeyConst::RECYCLE_RESERVED_ORDER_COUNT_TODAY;
-        $redis->incr($reservedOrderCountKey);
+//        $reservedOrderCountKey = RedisKeyConst::RECYCLE_RESERVED_ORDER_COUNT_TODAY;
+//        $redis->incr($reservedOrderCountKey);
 
         // 回收员在指定时间段的回收单数+1（Redis实现，注意如果用户取消或系统取消需要回退对应的数量）
         $recyclingDate = $data['recycle_date'];

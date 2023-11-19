@@ -37,22 +37,6 @@ class RedisKeyConst
 
     /*
     |----------------------------------------
-    | 小程序端 代仍 相关key
-    |----------------------------------------
-    */
-    /**
-     * 今日预约代仍总订单数统计Key.
-     */
-    const THROW_RESERVED_ORDER_COUNT_TODAY = 'throw:reservedOrderCount:today';
-
-    /**
-     * 回收员指定时间段的代仍单数Key前缀.
-     */
-    const THROW_RECYCLER_ORDER_COUNT_PREFIX = 'throw:recyclerOrderCount:';
-
-
-    /*
-    |----------------------------------------
     | 小程序端 回收 相关key
     |----------------------------------------
     */
@@ -65,6 +49,11 @@ class RedisKeyConst
      * 回收员指定时间段的回收单数Key前缀.
      */
     const RECYCLE_RECYCLER_ORDER_COUNT_PREFIX = 'recycle:recyclerOrderCount:';
+
+    /**
+     * 回收员指定时间段的代仍单数Key前缀.
+     */
+    const THROW_RECYCLER_ORDER_COUNT_PREFIX = 'recycle:recyclerOrderCount:';
 
     /**
      * 用户回收通知信息Key.
