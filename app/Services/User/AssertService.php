@@ -50,4 +50,14 @@ class AssertService
         UserAssetsModel::query()->where('id', $userId)->update(['credit' => $credit]);
         return true;
     }
+
+    //前10 售卖金额
+    public function getRecycleAmountLimit10()
+    {
+      //  $data = UserAssetsModel::query()->where('','>', 10)->select()->limit(10)->get()->toArray();
+
+        $data = UserAssetsModel::query()->macroQuery(['recycle_amount|>' => 10], ['id','user_id','recycle_amount','userInfo.*' ],['recycle_amount'=>'desc'],0,10);
+
+        return $data;
+    }
 }

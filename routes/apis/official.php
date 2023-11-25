@@ -17,8 +17,14 @@ Route::post('user/register', 'UserController@register');
 // 用户详情
 Route::get('user/detail', 'UserController@getUserDetail');
 
+// 用户修改
+Route::post('user/update', 'UserController@updateInfo');
+
 //用户签到
 Route::post('user/sign', 'UserController@sign');
+
+//小区列表
+Route::get('village/list', 'UserController@getVillageList');
 
 //添加地址
 Route::post('address/add', 'UserController@createAddress');
@@ -72,12 +78,6 @@ Route::get('activity/invite/list', 'UserController@getInviteActivityList');
 //新人福利活动列表
 Route::get('activity/newer/list', 'UserController@getNewerActivityList');
 
-/**=========================
- * 小区相关
- * ========================
- */
-//获取附近小区
-Route::get('village/list', 'UserController@getNearVillageList');
 
 
 /*

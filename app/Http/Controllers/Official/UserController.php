@@ -2,15 +2,12 @@
 
 namespace App\Http\Controllers\Official;
 
-use App\Services\Activity\InvitationService;
-use App\Services\Activity\NewerService;
+
 use App\Services\Common\WechatService;
 use App\Services\User\AddressService;
-use App\Services\User\UserAddressService;
-use App\Services\User\UserAssetsService;
 use App\Services\User\UserService;
-use App\Services\Village\VillageService;
-use App\Supports\Constant\ActivityConst;
+use App\Services\User\VillageService;
+
 
 class UserController extends BaseController
 {
@@ -41,8 +38,9 @@ class UserController extends BaseController
     {
         /** @var UserService $userService */
         $userService = app(UserService::class);
+        $openid = $this->request->get('openid');
 
-        return $this->success($userService->getUserDetail($this->userId));
+        return $this->success($userService->getUserDetail($openid));
     }
 
     public function updateInfo()
@@ -53,7 +51,8 @@ class UserController extends BaseController
             'nickname' => $this->request->get('nickname'),
             'avatar' => $this->request->get('headimgurl'),
             'mobile' => $this->request->get('mobile'),
-            'sex' => $this->request->get('sex')
+            'sex' => $this->request->get('sex'),
+            'user_id' => $this->userId
         ];
         return $this->success($userService->update($val));
     }
@@ -67,6 +66,14 @@ class UserController extends BaseController
     {
         app(UserService::class)->sign($this->userId);
         return $this->success();
+    }
+
+    public function getVillageList()
+    {
+        /** @var VillageService $villageService */
+        $villageService = app(VillageService::class);
+        $data = $villageService->getVillageList();
+        return $this->success($data);
     }
 
     /**
@@ -99,9 +106,7 @@ class UserController extends BaseController
     {
         $id = $this->request->get('id');
         $data = [
-            'user_id' => $this->userId,
             'village_id' => $this->request->get('village_id'),
-            'village_floor_id' => $this->request->get('village_floor_id'),
             'mobile' => $this->request->get('mobile'),
             'address' => $this->request->get('address'),
             'is_default' => $this->request->get('is_default', false)
@@ -109,7 +114,7 @@ class UserController extends BaseController
 
         /** @var AddressService $addressService */
         $addressService = app(AddressService::class);
-        $addressService->createAddress($this->userId, $data);
+        $addressService->updateAddress($id, $data);
 
         return $this->success();
     }

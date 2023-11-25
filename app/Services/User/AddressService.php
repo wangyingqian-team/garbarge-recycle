@@ -4,6 +4,7 @@ namespace App\Services\User;
 
 use App\Models\UserAddressModel;
 use App\Supports\Constant\UserConst;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -89,7 +90,18 @@ class AddressService
 
     //地址列表
     public function getAddressList($userId) {
-        return UserAddressModel::query()->where('user_id', $userId)->get()->toArray();
+        $data = UserAddressModel::query()->where('user_id', $userId)->get()->toArray();
+        foreach ($data as $k => $datum) {
+            if ($datum['is_default'] == 1) {
+                $default =$datum;
+                unset($data[$k]);
+                $data = array_merge([$default], $data);
+                break;
+            }
+        }
+
+        return $data;
+
     }
 
     //地址列表

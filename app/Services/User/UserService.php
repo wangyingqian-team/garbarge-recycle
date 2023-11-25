@@ -54,28 +54,28 @@ class UserService
             'sex' => $data['sex'] ?? '',
         ];
 
-        return UserModel::query()->where('user_id', $data['user_id'])->update($val);
+        return UserModel::query()->where('id', $data['user_id'])->update($val);
     }
 
 
-    public function getUserDetail($userId)
+    public function getUserDetail($openid)
     {
-        $userInfo = UserModel::query()->where('id', $userId)->macroFirst();
+        $userInfo = UserModel::query()->where('openid', $openid)->macroFirst();
         //等级进度
         $userInfo['exp_progress'] = $userInfo['level'] == 9 ? 1 : round($userInfo['exp'] / UserConst::LEVEL_EXP[$userInfo['level'] + 1]);
         //地址
-        $userInfo['address'] = UserAddressModel::query()->where('user_id', $userId)->orderByDesc('is_default')->get()->toArray();
+        $userInfo['default_address'] = UserAddressModel::query()->where('user_id', $userInfo['id'])->orderByDesc('is_default')->get()->toArray();
         //资产
-        $userInfo['asserts'] = UserAssetsModel::query()->where('user_id', $userId)->macroFirst();
+        $userInfo['asserts'] = UserAssetsModel::query()->where('user_id',  $userInfo['id'])->macroFirst();
         //会员权益
-        $equity = $this->getUserEquity($userId);
+        $equity = $this->getUserEquity( $userInfo['id']);
         $userInfo['equity'] = $equity;
         //上级userid
-        $superior = InvitationRelationModel::query()->where('user_id', $userId)->where('is_active', 1)->macroFirst();
+        $superior = InvitationRelationModel::query()->where('user_id',  $userInfo['id'])->where('is_active', 1)->macroFirst();
         $userInfo['superior_id'] = $superior['superior_id'] ?? 0;
 
         //今日是否签到
-        $userInfo['is_sign'] = !empty(Redis::connection('user')->hget(RedisKeyConst::USER_SIGN, $userId));
+        $userInfo['is_sign'] = !empty(Redis::connection('user')->hget(RedisKeyConst::USER_SIGN,  $userInfo['id']));
 
         return $userInfo;
     }
