@@ -4,7 +4,7 @@
 namespace App\Services\Activity;
 
 use App\Exceptions\RestfulException;
-use App\Models\InvitationRecordModel;
+use App\Models\BeanRecordModel;
 use App\Models\InvitationRelationModel;
 use App\Models\UserAssetsModel;
 use App\Supports\Constant\ActivityConst;
@@ -70,20 +70,20 @@ class InvitationService
      * @param $money
      * @return bool
      */
-    public function getBean($userId, $orderNo, $money)
+    public function getBean($userId, $superiorId,$orderNo, $money)
     {
         //计算绿豆
-        $level = Redis::connection('activity')->hget('invitation_level', $userId) ?: 0;
+        $level = Redis::connection('activity')->hget('invitation_level', $superiorId) ?: 0;
         $multi = ActivityConst::ACTIVITY_BEAN_MULTI[$level];
         $bean = round($money, $multi);
         DB::beginTransaction();
         try {
             //生成记录
-            InvitationRecordModel::query()->insert([
+            BeanRecordModel::query()->insert([
                 'user_id' => $userId,
+                'superior_id' => $superiorId,
                 'order_no' => $orderNo,
                 'bean' => $bean,
-                'status' => 2
             ]);
 
             //更新绿豆
@@ -104,57 +104,23 @@ class InvitationService
      * 花费绿豆
      *
      * @param $userId
-     * @param $orderNo
      * @param $bean
      */
-    public function costBean($userId, $orderNo, $bean)
+    public function costBean($userId, $bean)
     {
-        DB::beginTransaction();
-        try {
-            //查询绿豆数量
-            $assert = $assert = UserAssetsModel::query()->where('user_id', $userId)->macroFirst();
-            if ($assert['bean'] < $bean) {
-                throw new RestfulException('绿豆数量不足');
-            }
-
-            $nb = bcsub($assert['bean'], $bean);
-            UserAssetsModel::query()->where('user_id', $userId)->update(['bean' => $nb]);
-
-            //生成记录
-            InvitationRecordModel::query()->insert([
-                'user_id' => $userId,
-                'order_no' => $orderNo,
-                'bean' => -$bean,
-                'status' => 1
-            ]);
-
-        } catch (\Throwable $e){
-            Log::channel('activity')->warn( ['msg' => "{$orderNo}绿豆花费失败", 'data' => $e->getMessage()]);
-            DB::rollBack();
+        //查询绿豆数量
+        $assert = $assert = UserAssetsModel::query()->where('user_id', $userId)->macroFirst();
+        if ($assert['bean'] < $bean) {
+            throw new RestfulException('绿豆数量不足');
         }
 
-        DB::commit();
+        $nb = bcsub($assert['bean'], $bean);
+        UserAssetsModel::query()->where('user_id', $userId)->update(['bean' => $nb]);
     }
 
-    /**
-     * 绿豆消费成功
-     *
-     * @param $orderNo
-     * @return int
-     */
-    public function consumeBean($orderNo)
+    public function getBeanRecord($superiorId, $page, $pageSize)
     {
-        return InvitationRecordModel::query()->where('order_no', $orderNo)->update(['status'=>2]);
-    }
-
-    public function getBeanRecord($userId, $type, $page, $pageSize)
-    {
-        //1 是 获得 2是消费
-        if ($type = 1) {
-            $where = ['user_id'=> $userId, ['bean', '>', 0]];
-            return InvitationRecordModel::query()->macroQuery($where, ['*'], [], $page, $pageSize, 1);
-        }else{
-
-        }
+        $where = ['superior_id'=> $superiorId];
+        return BeanRecordModel::query()->macroQuery($where, ['*','subUserInfo.id','subUserInfo.nickname','subUserInfo.level','subUserInfo.avatar'], ['create_time'=>'desc'], $page, $pageSize, 1);
     }
 }

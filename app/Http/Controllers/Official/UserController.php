@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Official;
 
 
 use App\Services\Activity\CouponService;
+use App\Services\Activity\InvitationService;
 use App\Services\Common\WechatService;
 use App\Services\User\AddressService;
 use App\Services\User\UserService;
@@ -214,6 +215,18 @@ class UserController extends BaseController
                     break;
             }
         }
+
+        return $this->success($data);
+    }
+
+    //绿豆列表
+    public function getBeanList()
+    {
+        /** @var InvitationService $service */
+        $service = app(InvitationService::class);
+        $page = $this->request->get('page');
+        $pageSize = $this->request->get('page_size', 10);
+        $data = $service->getBeanRecord($this->userId,$page, $pageSize);
 
         return $this->success($data);
     }

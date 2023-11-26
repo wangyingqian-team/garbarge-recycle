@@ -56,6 +56,19 @@ Route::get('coupon/detail', 'UserController@getCouponDetail');
 Route::get('coupon/list', 'UserController@getCouponList');
 
 
+/**=========================
+ * 活动相关
+ * ========================
+ */
+//绿豆列表
+Route::get('bean/list', 'UserController@getBeanList');
+
+//邀请有礼活动列表
+Route::get('activity/invite/list', 'UserController@getInviteActivityList');
+
+//新人福利活动列表
+Route::get('activity/newer/list', 'UserController@getNewerActivityList');
+
 
 
 /**
@@ -75,24 +88,8 @@ Route::get('jifen/order/list', 'JifenController@getOrderList');
 Route::get('jifen/order/detail', 'JifenController@getOrderDetail');
 
 
-/**=========================
- * 优惠券相关
- * ========================
- */
 
 
-/**=========================
- * 活动相关
- * ========================
- */
-//领取活动奖励
-Route::post('activity/receive', 'UserController@receiveActivityReward');
-
-//邀请有礼活动列表
-Route::get('activity/invite/list', 'UserController@getInviteActivityList');
-
-//新人福利活动列表
-Route::get('activity/newer/list', 'UserController@getNewerActivityList');
 
 
 
