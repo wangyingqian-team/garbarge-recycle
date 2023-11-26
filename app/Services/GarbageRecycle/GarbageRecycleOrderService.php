@@ -6,6 +6,7 @@ use App\Events\GarbageRecycleOrderCancelEvent;
 use App\Events\GarbageRecycleOrderCreateEvent;
 use App\Events\GarbageRecycleOrderFinishEvent;
 use App\Exceptions\RestfulException;
+use App\Models\GarbageOrderDetailModel;
 use App\Models\GarbageOrderModel;
 use App\Services\Activity\CouponService;
 use App\Services\Activity\InvitationService;
@@ -226,17 +227,51 @@ class GarbageRecycleOrderService
     }
 
     /**
+     * 回收员设置回收订单明细（添加分类）.
+     *
+     * @param $orderNo
+     * @param $orderDetails
+     *          -> [i].garbage_type_id 二级分类id
+     *          -> [i].actual_weight 实际重量
+     *          -> [i].recycle_price 回收单价
+     * @return bool
+     */
+    public function setGarbageRecycleOrderDetails($orderNo, $orderDetails)
+    {
+        // 检查订单状态.
+        $orderInfo = $this->getGarbageRecycleOrderInfo(['order_no' => $orderNo]);
+        if ($orderInfo['status'] != GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_RECYCLING) {
+            throw new RestfulException('该回收订单不属于回收中状态，不可添加分类！');
+        }
+        $orderDetailsData = [];
+        foreach ($orderDetails as $orderDetail) {
+            $orderDetailsData[] = [
+                'garbage_order_no' => $orderNo,
+                'garbage_type_id' => $orderDetail['garbage_type_id'],
+                'actual_weight' => $orderDetail['actual_weight'],
+                'recycle_price' => $orderDetail['recycle_price'],
+                'recycle_amount' => bcmul($orderDetail['actual_weight'], $orderDetail['recycle_price'], 2)
+            ];
+        }
+
+        if (!empty($orderDetailsData)) {
+            GarbageOrderDetailModel::query()->insert($orderDetailsData);
+        }
+
+        return true;
+    }
+
+    /**
      * 回收员完成回收订单.
      *
      * @param string $orderNo 订单号
-     * @param string $actualWeight 订单实际重量
      * @param double $recycleAmount 订单实际回收金额
      *
      * @return bool
      *
      * @throws \Throwable
      */
-    public function finishGarbageRecycleOrder($orderNo, $actualWeight, $recycleAmount)
+    public function finishGarbageRecycleOrder($orderNo, $recycleAmount)
     {
         // 检查订单状态
         $orderInfo = $this->getGarbageRecycleOrderInfo(['order_no' => $orderNo]);
@@ -253,7 +288,7 @@ class GarbageRecycleOrderService
         $beanAmount = 0;
         if (!empty($promotionInfo['bean_num'])) {
             // 扣减绿豆
-            app(InvitationService::class)->costBean($userId, $orderNo, $promotionInfo['bean_num']);
+            app(InvitationService::class)->costBean($userId, $promotionInfo['bean_num']);
             app(InvitationService::class)->consumeBean($orderInfo);
 
             // 增加交易额
@@ -309,7 +344,6 @@ class GarbageRecycleOrderService
         // 修改订单完成数据.
         GarbageOrderModel::query()->where('order_no', $orderNo)->update([
             'status' => GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_FINISHED,
-            'actual_weight' => $actualWeight,
             'total_amount' => $totalAmount,
             'bean_amount' => $beanAmount,
             'voucher_coupon_amount' => $voucherCouponAmount,
@@ -501,7 +535,7 @@ class GarbageRecycleOrderService
         $redis = Redis::connection('recycle');
         $noticeKey = RedisKeyConst::RECYCLE_NOTICE_USER;
         $userInfo = app(UserService::class)->getUserDetail($userId);
-        $orderInfo = $this->getGarbageRecycleOrderInfo(['order_no' => $orderNo], ['order_no', 'total_amount']);
+        $orderInfo = $this->getGarbageRecycleOrderInfo(['order_no' => $orderNo]);
         $noticeMsg = '用户"' . $userInfo['nickname'] . '"' . '在' . $orderInfo['finish_time'] . '回收收益' . $orderInfo['total_amount'] . '元';
         $notice = json_encode([
             'time' => time(),

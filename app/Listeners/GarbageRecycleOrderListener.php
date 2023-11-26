@@ -75,7 +75,7 @@ class GarbageRecycleOrderListener
         $invitationInfo = app(InvitationService::class)->getUserInvitation($userId);
         if (!empty($invitationInfo)) {
             $superiorUserId = $invitationInfo['superior_id'];
-            app(InvitationService::class)->getBean($superiorUserId, $orderNo, $recycleAmount);
+            app(InvitationService::class)->getBean($userId, $superiorUserId, $orderNo, $recycleAmount);
         }
 
         // redis 更新用户收益

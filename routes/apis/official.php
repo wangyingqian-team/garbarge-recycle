@@ -105,29 +105,26 @@ Route::get('recycle/timePeriod/list', 'GarbageRecycleController@getRecycleTimePe
 // 创建回收订单
 Route::post('recycle/order/create', 'GarbageRecycleController@createGarbageRecycleOrder');
 
-// 用户确认回收订单（确认为已完成）
-Route::get('recycle/order/confirm', 'GarbageRecycleController@confirmRecycleOrderByUser');
+// 回收员订单接单
+Route::put('recycle/order/receive', 'GarbageRecycleController@receiveRecycleOrder');
 
-// 用户取消回收预约（预约取消）
-Route::get('recycle/order/cancelByReserve', 'GarbageRecycleController@cancelRecycleOrderByUserReserve');
+// 回收员上门
+Route::put('recycle/order/start', 'GarbageRecycleController@startRecycleOrder');
 
-// 用户取消回收订单（确认取消）
-Route::get('recycle/order/cancelByConfirm', 'GarbageRecycleController@cancelRecycleOrderByUserConfirm');
+// 回收员完成回收订单（结算！！）
+Route::put('recycle/order/finish', 'GarbageRecycleController@finishRecycleOrder');
 
-// 用户评价回收订单
-Route::post('recycle/order/rate/add', 'GarbageRecycleController@rateGarbageRecycleOrder');
-
-// 用户我的回收评价列表
-Route::get('recycle/order/rate/list', 'GarbageRecycleController@getUserRecycleRateList');
-
-// 用户回收订单列表
+// 用户回收历史订单列表（只显示已完成的订单）
 Route::get('recycle/order/list', 'GarbageRecycleController@getUserRecycleOrderList');
 
 // 用户回收订单详情
 Route::get('recycle/order/info', 'GarbageRecycleController@getUserRecycleOrderInfo');
 
-// 回收员确认回收订单（确认为待完成）
-Route::post('recycle/recycler/order/confirm', 'GarbageRecycleController@confirmRecycleOrderByRecycler');
+//// 用户取消回收预约（预约取消）todo
+//Route::get('recycle/order/cancelByReserve', 'GarbageRecycleController@cancelRecycleOrderByUserReserve');
+//
+//// 用户取消回收订单（确认取消）
+//Route::get('recycle/order/cancelByConfirm', 'GarbageRecycleController@cancelRecycleOrderByUserConfirm');
 
 // 回收员取消回收订单
 Route::get('recycle/recycler/order/cancel', 'GarbageRecycleController@cancelRecycleOrderByRecycler');

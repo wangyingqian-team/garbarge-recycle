@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Official;
 
 use App\Services\GarbageRecycle\GarbageCategoryService;
 use App\Services\GarbageRecycle\GarbageRecycleOrderService;
+use App\Supports\Constant\GarbageRecycleConst;
 
 class GarbageRecycleController extends BaseController
 {
@@ -29,7 +30,7 @@ class GarbageRecycleController extends BaseController
     }
 
     /**
-     * 查询指定小区指定日期的可回收时间段列表.
+     * 查询可回收时间段列表.
      *
      * @return mixed
      */
@@ -65,16 +66,46 @@ class GarbageRecycleController extends BaseController
     }
 
     /**
-     * 用户确认回收订单（确认为已完成）.
+     * 回收员接单.
      *
      * @return mixed
      *
      */
-    public function confirmRecycleOrderByUser()
+    public function receiveRecycleOrder()
     {
         $orderNo = $this->request->get('order_no');
 
-        $result = app(GarbageRecycleOrderService::class)->confirmRecycleOrderByUser($orderNo);
+        $result = app(GarbageRecycleOrderService::class)->receiveGarbageRecycleOrder($orderNo);
+
+        return $this->success($result);
+    }
+
+    /**
+     * 回收员上门.
+     *
+     * @return mixed
+     */
+    public function startRecycleOrder()
+    {
+        $orderNo = $this->request->get('order_no');
+
+        $result = app(GarbageRecycleOrderService::class)->startGarbageRecycleOrder($orderNo);
+
+        return $this->success($result);
+    }
+
+    /**
+     * 回收员订单完成.
+     *
+     * @return mixed
+     * @throws \Throwable
+     */
+    public function finishRecycleOrder()
+    {
+        $orderNo = $this->request->get('order_no');
+        $recycleAmount = $this->request->get('recycle_amount');
+
+        $result = app(GarbageRecycleOrderService::class)->finishGarbageRecycleOrder($orderNo, $recycleAmount);
 
         return $this->success($result);
     }
@@ -110,47 +141,7 @@ class GarbageRecycleController extends BaseController
     }
 
     /**
-     * 用户评价回收订单.
-     *
-     * @return mixed
-     *
-     */
-    public function rateGarbageRecycleOrder()
-    {
-        $userId = $this->userId;
-        $orderNo = $this->request->post('order_no');
-        $type = $this->request->post('type');
-        $content = $this->request->post('content');
-        $image = $this->request->post('image');
-
-        $result = app(GarbageRecycleRateService::class)->addGarbageRecycleRate($userId, $orderNo, $type, $content, $image);
-
-        return $this->success($result);
-    }
-
-    /**
-     * 用户我的评价列表.
-     *
-     * @return mixed
-     *
-     */
-    public function getUserRecycleRateList()
-    {
-        $userId = $this->userId;
-        $page = $this->page;
-        $pageSize = $this->pageSize;
-
-        $where = ['user_id' => $userId];
-        $select = ['*', 'order.*'];
-        $orderBy = ['create_time' => 'desc'];
-
-        $result = app(GarbageRecycleRateService::class)->getGarbageRecycleRateList($where, $select, $orderBy, $page, $pageSize);
-
-        return $this->success($result);
-    }
-
-    /**
-     * 用户回收订单列表.
+     * 用户回收历史订单列表.
      *
      * @return mixed
      *
@@ -160,11 +151,11 @@ class GarbageRecycleController extends BaseController
         $userId = $this->userId;
         $page = $this->page;
         $pageSize = $this->pageSize;
-        $status = $this->request->get('status');
+        $status = GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_FINISHED;
 
         $where = ['user_id' => $userId];
         !empty($status) && $where['status'] = $status;
-        $select = ['*', 'recycler.*'];
+        $select = ['*'];
         $orderBy = ['create_time' => 'desc'];
 
         $result = app(GarbageRecycleOrderService::class)->getGarbageRecycleOrderList($where, $select, $orderBy, $page, $pageSize);

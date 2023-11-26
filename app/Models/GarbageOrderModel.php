@@ -32,4 +32,9 @@ class GarbageOrderModel extends Model
         return $this->hasOne(UserAddressModel::class, 'id', 'address_id');
     }
 
+    public function details()
+    {
+        return $this->hasMany(GarbageOrderModel::class, 'garbage_order_no', 'order_no');
+    }
+
 }
