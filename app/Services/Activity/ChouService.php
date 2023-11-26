@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Redis;
  */
 class ChouService
 {
-    //概率和奖品   优惠券90天有效
+    //概率和奖品   优惠券30天有效
     const JIANG_PIN = [//概率 => 奖品  10%不中奖
         //积分
         'ji_fen' => [ //60%
