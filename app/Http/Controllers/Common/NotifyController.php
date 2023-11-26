@@ -63,8 +63,4 @@ class NotifyController extends Controller
 
         return  $data;
     }
-
-
-    //发送短信
-    public function sendSms() {}
 }
