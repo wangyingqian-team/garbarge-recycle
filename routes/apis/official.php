@@ -41,6 +41,22 @@ Route::get('address/list', 'UserController@getAddressList');
 //地址详情
 Route::get('address/detail', 'UserController@getAddressDetail');
 
+/**
+ * ===============================
+ * 优惠券相关
+ * =================================
+ */
+//获取优惠券
+Route::post('coupon/get', 'UserController@getCoupon');
+
+//优惠券详情
+Route::get('coupon/detail', 'UserController@getCouponDetail');
+
+//优惠券列表
+Route::get('coupon/list', 'UserController@getCouponList');
+
+
+
 
 /**
  * ===============================

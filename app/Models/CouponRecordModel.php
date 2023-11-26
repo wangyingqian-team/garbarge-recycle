@@ -10,4 +10,9 @@ class CouponRecordModel extends Model
 
     public $timestamps = false;
 
+    public function coupon()
+    {
+        return $this->belongsTo(CouponModel::class, 'coupon_id', 'id');
+    }
+
 }

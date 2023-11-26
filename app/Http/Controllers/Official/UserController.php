@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Official;
 
 
+use App\Services\Activity\CouponService;
 use App\Services\Common\WechatService;
 use App\Services\User\AddressService;
 use App\Services\User\UserService;
 use App\Services\User\VillageService;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 
 
 class UserController extends BaseController
@@ -146,4 +149,72 @@ class UserController extends BaseController
         return $this->success($data);
     }
 
+
+    //领取优惠券
+    public function getCoupon()
+    {
+        $couponId = $this->request->get('coupon_id');
+        $expire = Carbon::now()->addDays(90);
+        /** @var CouponService $couponService */
+        $couponService = app(CouponService::class);
+        $couponService->obtainCoupon($this->userId, $couponId, $expire);
+
+        return $this->success(true);
+    }
+
+    //优惠券详情
+    public function getCouponDetail()
+    {
+        $couponId = $this->request->get('coupon_id');
+        /** @var CouponService $couponService */
+        $couponService = app(CouponService::class);
+        $detail = $couponService->getCouponDetail( $couponId);
+
+        return $this->success($detail);
+    }
+
+    //优惠券列表
+    public function getCouponList()
+    {
+        $status = $this->request->get('status');
+        /** @var CouponService $couponService */
+        $couponService = app(CouponService::class);
+        $list = $couponService->getCouponList($this->userId, $status);
+        $data = [
+            'pz' => [
+                'name' => '膨胀券',
+                'items' => []
+            ],
+            'dj' => [
+                'name' => '代金券',
+                'items' => []
+            ],
+            'dh' => [
+                'name' => '兑换券',
+                'items' => []
+            ],
+            'hf' => [
+                'name' => '话费券',
+                'items' => []
+            ],
+        ];
+        foreach ($list as $item){
+            switch ($item['coupon']['type']) {
+                case 1 :
+                    $data['hf']['items'][] = $item;
+                    break;
+                case 2:
+                    $data['pz']['items'][] = $item;
+                    break;
+                case 3:
+                    $data['dj']['items'][] = $item;
+                    break;
+                case 4:
+                    $data['dh']['items'][] = $item;
+                    break;
+            }
+        }
+
+        return $this->success($data);
+    }
 }

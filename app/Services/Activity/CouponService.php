@@ -4,6 +4,7 @@
 namespace App\Services\Activity;
 
 use App\Exceptions\RestfulException;
+use App\Models\CouponModel;
 use App\Models\CouponRecordModel;
 use App\Models\InvitationRecordModel;
 use App\Models\InvitationRelationModel;
@@ -36,7 +37,7 @@ class CouponService
         return CouponRecordModel::query()->insert([
             'user_id' => $userId,
             'coupon_id' => $id,
-            'expire_time' => $expire
+            'expire_time' => $expire,
         ]);
     }
 
@@ -79,7 +80,7 @@ class CouponService
      */
     public function getCouponDetail($id)
     {
-        return CouponRecordModel::query()->whereKey($id)->macroFirst();
+        return CouponModel::query()->whereKey($id)->macroFirst();
     }
 
     /**
@@ -91,12 +92,14 @@ class CouponService
      * @param $limit
      * @return mixed
      */
-    public function getCouponList($userId, $type, $page, $limit)
+    public function getCouponList($userId, $status = null, $type = null)
     {
         $where = [
             'user_id' => $userId,
-            'type' => $type
         ];
-        return CouponRecordModel::query()->macroQuery($where, ['*'], ['create_time'=>'desc'], $page, $limit, true);
+        $type && $where['type'] = $type;
+        $status && $where['status'] = $status;
+
+        return CouponRecordModel::query()->macroQuery($where, ['*', 'coupon.*']);
     }
 }

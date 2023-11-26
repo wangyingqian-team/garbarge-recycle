@@ -7,6 +7,7 @@ use App\Console\Commands\AutoCancelGarbageOrder;
 use App\Console\Commands\AutoCheckInvitationActive;
 use App\Console\Commands\AutoClearSign;
 use App\Console\Commands\CouponExpire;
+use App\Console\Commands\CouponExpireSoon;
 use App\Console\Commands\Init;
 use App\Console\Commands\NewerExpire;
 use App\Console\Commands\SettleCredit;
@@ -24,6 +25,7 @@ class Kernel extends ConsoleKernel
         Init::class,
         AutoClearSign::class,
         AutoCheckInvitationActive::class,
+        CouponExpireSoon::class,
         CouponExpire::class,
         SettleCredit::class,
         NewerExpire::class,
@@ -42,6 +44,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('garbage:settle_credit')->monthlyOn(1,'2:10');
 
         $schedule->command('garbage:invitation_active')->dailyAt('3:00');
+
+        $schedule->command('garbage:coupon_expire_soon')->dailyAt('6:00');
 
         $schedule->command('garbage:coupon_expire')->dailyAt('21:00');
 
