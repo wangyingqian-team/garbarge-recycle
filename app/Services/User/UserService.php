@@ -7,6 +7,7 @@ use App\Models\InvitationRelationModel;
 use App\Models\UserAddressModel;
 use App\Models\UserAssetsModel;
 use App\Models\UserModel;
+use App\Services\Activity\InvitationService;
 use App\Services\Activity\NewerService;
 use App\Supports\Constant\RedisKeyConst;
 use App\Supports\Constant\UserConst;
@@ -64,18 +65,22 @@ class UserService
         //等级进度
         $userInfo['exp_progress'] = $userInfo['level'] == 9 ? 1 : round($userInfo['exp'] / UserConst::LEVEL_EXP[$userInfo['level'] + 1]);
         //地址
-        $userInfo['default_address'] = UserAddressModel::query()->where('user_id', $userInfo['id'])->orderByDesc('is_default')->get()->toArray();
+        $userInfo['default_address'] = UserAddressModel::query()->where(['user_id'=> $userInfo['id'],'is_default'=> 1])->macroFirst();
         //资产
         $userInfo['asserts'] = UserAssetsModel::query()->where('user_id',  $userInfo['id'])->macroFirst();
         //会员权益
         $equity = $this->getUserEquity( $userInfo['id']);
         $userInfo['equity'] = $equity;
-        //上级userid
-        $superior = InvitationRelationModel::query()->where('user_id',  $userInfo['id'])->where('is_active', 1)->macroFirst();
-        $userInfo['superior_id'] = $superior['superior_id'] ?? 0;
-
         //今日是否签到
         $userInfo['is_sign'] = !empty(Redis::connection('user')->hget(RedisKeyConst::USER_SIGN,  $userInfo['id']));
+
+        /** @var InvitationService $invitationService */
+        $invitationService = app(InvitationService::class);
+        //我的上级
+        $userInfo['superior'] = $invitationService->getUserInvitation($userInfo['id']);
+        //今日是否已经免费抽奖
+        $redis = Redis::connection('activity');
+        $userInfo['free_chou'] = !(bool)$redis->hexists('chou_jiang_count', $userInfo['id']);
 
         return $userInfo;
     }

@@ -63,13 +63,11 @@ Route::get('coupon/list', 'UserController@getCouponList');
 //绿豆列表
 Route::get('bean/list', 'UserController@getBeanList');
 
-//邀请有礼活动列表
-Route::get('activity/invite/list', 'UserController@getInviteActivityList');
+//下级推广列表
+Route::get('invite/sub_list', 'UserController@getSubInvitationList');
 
-//新人福利活动列表
-Route::get('activity/newer/list', 'UserController@getNewerActivityList');
-
-
+//抽奖
+Route::post('chou', 'UserController@chou');
 
 /**
  * ===============================

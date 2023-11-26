@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Official;
 
 
+use App\Services\Activity\ChouService;
 use App\Services\Activity\CouponService;
 use App\Services\Activity\InvitationService;
 use App\Services\Common\WechatService;
@@ -227,6 +228,27 @@ class UserController extends BaseController
         $page = $this->request->get('page');
         $pageSize = $this->request->get('page_size', 10);
         $data = $service->getBeanRecord($this->userId,$page, $pageSize);
+
+        return $this->success($data);
+    }
+
+    //推广列表(下级列表)
+    public function getSubInvitationList()
+    {
+        /** @var InvitationService $service */
+        $service = app(InvitationService::class);
+        //下级列表
+        $data = $service->getUserSubInvitation($this->userId);
+
+        return $this->success($data);
+    }
+
+    //抽奖
+    public function chou()
+    {
+        /** @var ChouService $service */
+        $service = app(ChouService::class);
+        $data = $service->chou($this->userId);
 
         return $this->success($data);
     }

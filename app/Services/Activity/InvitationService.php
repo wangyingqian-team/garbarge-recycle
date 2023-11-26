@@ -59,7 +59,22 @@ class InvitationService
      */
     public function getUserInvitation($userId)
     {
-        return InvitationRelationModel::query()->macroWhere(['user_id', $userId])->macroSelect(["*"])->macroFirst();
+        return InvitationRelationModel::query()->macroWhere(['user_id'=> $userId,'is_active'=>1])->macroSelect(["*",'supUserInfo.id','supUserInfo.nickname','supUserInfo.level','supUserInfo.avatar'])->macroFirst();
+    }
+
+    /**
+     * 获取指定用户的下级关系.
+     *
+     * @param $userId
+     * @return mixed
+     */
+    public function getUserSubInvitation($userId)
+    {
+        return InvitationRelationModel::query()
+            ->macroWhere(['superior_id'=> $userId,'is_active'=>1])
+            ->macroSelect(["*",'subUserInfo.id','subUserInfo.nickname','subUserInfo.level','subUserInfo.avatar'])
+            ->orderBy('create_time','desc')
+            ->get();
     }
 
     /**
