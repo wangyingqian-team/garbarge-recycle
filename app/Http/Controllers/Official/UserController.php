@@ -252,4 +252,9 @@ class UserController extends BaseController
 
         return $this->success($data);
     }
+
+    //发送短信验证码
+    public function sendSms() {
+        $mobile = $this->request->get('mobile');
+    }
 }

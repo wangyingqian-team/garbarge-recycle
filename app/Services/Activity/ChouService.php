@@ -25,58 +25,36 @@ class ChouService
     //概率和奖品   优惠券30天有效
     const JIANG_PIN = [//概率 => 奖品  10%不中奖
         //积分
-        'ji_fen' => [ //60%
+        'ji_fen' => [ //65%
             60 => 10,
             80 => 20,
-            90 => 50,
-            95 => 200,
-            99 => 500,
-            100 => 1000
+            92 => 50,
+            100 => 200,
         ],
         //话费  概率 => 奖品id
-        'hua_fei' => [ // 3%
-            85 => [
-                'num' => '一张10元话费券',
-                'id' => 1,
-            ], //10元话费券
-            99 => [
-                'num' => '一张30元话费券',
+        'hua_fei' => [ // 0.3%
+            100 => [
+                'num' => '一张20元话费券',
                 'id' => 3,
-            ] , //30元话费券
-            100 =>[
-                'num' => '一张100元话费券',
-                'id' => 5,
-            ], //100元话费券
+            ], //10元话费券
         ],
         //膨胀券
-        'peng_zhang' => [ // 32%
+        'peng_zhang' => [ // 33%
             70 => [
                 'num' => '一张1.1倍膨胀, 最高可膨胀10元',
                 'id' => 6,
             ] , // 1.1倍膨胀, 最高膨胀10元
-            90 => [
+            100 => [
                 'num' => '一张1.2倍膨胀， 最高膨胀20元',
                 'id' => 7,
-            ] , // 1.2倍膨胀， 最高膨胀20元
-            100 => [
-                'num' => '一张1.3倍膨胀，最高膨胀30元',
-                'id' => 8,
-            ] , // 1.3倍膨胀，最高膨胀30元
+            ] ,
         ],
         //代金券
-        'dai_jin' => [ // 5%
-            85 =>  [
-                'num' => '一张2元代金券',
-                'id' => 12,
-            ], // 2元代金券
-            98 =>  [
+        'dai_jin' => [ // 1.7%
+            100 =>  [
                 'num' => '一张5元代金券',
                 'id' => 13,
             ],// 5元代金券
-            100 =>  [
-                'num' => '一张10元代金券',
-                'id' => 14,
-            ]// 10元代金券
         ],
     ];
 
@@ -122,11 +100,11 @@ class ChouService
         DB::beginTransaction();
         try {
             $t = Carbon::today()->addDays(90);
-            $r1 = mt_rand(1, 100);
+            $r1 = mt_rand(1, 1000);
             $r2 = mt_rand(1, 100);
 
             //抽到积分
-            if ($r1 <= 60) {
+            if ($r1 <= 650) {
                 foreach (self::JIANG_PIN['ji_fen'] as $k => $v) {
                     if ($k >= $r2) {
                         $jifen += $v;
@@ -139,7 +117,7 @@ class ChouService
                 }
                 //抽到优惠券
             } else{
-                if ($r1 <= 63) {
+                if ($r1 <= 653) {
                     foreach (self::JIANG_PIN['hua_fei'] as $k => $v) {
                         if ($k >= $r2) {
                             $id = $v['id'];
@@ -148,7 +126,7 @@ class ChouService
                             break;
                         }
                     }
-                } elseif ($r1 <= 95) {
+                } elseif ($r1 <= 983) {
                     foreach (self::JIANG_PIN['peng_zhang'] as $k => $v) {
                         if ($k >= $r2) {
                             $id = $v['id'];
@@ -157,7 +135,7 @@ class ChouService
                             break;
                         }
                     }
-                } elseif ($r1 <= 100) {
+                } elseif ($r1 <= 1000) {
                     foreach (self::JIANG_PIN['dai_jin'] as $k => $v) {
                         if ($k >= $r2) {
                             $id = $v['id'];
