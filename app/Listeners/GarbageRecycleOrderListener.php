@@ -34,7 +34,7 @@ class GarbageRecycleOrderListener
         // 回收员在指定时间段的回收单数+1（Redis实现，注意如果用户取消或系统取消需要回退对应的数量）
         $recyclingDate = $data['recycle_date'];
         $recyclePeriod = $data['recycle_period'];
-        $recyclerOrderPeriodCountKey = RedisKeyConst::THROW_RECYCLER_ORDER_COUNT_PREFIX . ':' . $recyclingDate;
+        $recyclerOrderPeriodCountKey = RedisKeyConst::THROW_RECYCLER_ORDER_COUNT_PREFIX . $recyclingDate;
         $redis->hincrby($recyclerOrderPeriodCountKey, $recyclePeriod, 1);
     }
 
