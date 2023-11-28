@@ -91,6 +91,7 @@ class UserController extends BaseController
         $data = [
             'user_id' => $this->userId,
             'village_id' => $this->request->get('village_id'),
+            'contacts' => $this->request->get('contacts'),
             'mobile' => $this->request->get('mobile'),
             'address' => $this->request->get('address'),
             'is_default' => $this->request->get('is_default', false)
@@ -112,6 +113,7 @@ class UserController extends BaseController
         $id = $this->request->get('id');
         $data = [
             'village_id' => $this->request->get('village_id'),
+            'contacts' => $this->request->get('contacts'),
             'mobile' => $this->request->get('mobile'),
             'address' => $this->request->get('address'),
             'is_default' => $this->request->get('is_default', false)

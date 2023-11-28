@@ -26,7 +26,6 @@ class AddressService
 
         DB::transaction(
             function () use ($userId, $data) {
-
                 if ($data['is_default'] ?? false) {
                     $oldDefault = UserAddressModel::query()->where(['user_id' => $userId, 'is_default' => UserConst::IS_DEFAULT_ADDRESS])->macroFirst();
                     if (!empty($oldDefault)) {
@@ -37,6 +36,7 @@ class AddressService
                 $iData = [
                     'user_id' => $userId,
                     'village_id' => $data['village_id'],
+                    'contacts' => $data['contacts'],
                     'address' => $data['address'],
                     'mobile' => $data['mobile'],
                     'is_default' => $data['is_default'],
@@ -72,6 +72,7 @@ class AddressService
                     'address' => $data['address'] ?? null,
                     'mobile' => $data['mobile'] ?? null,
                     'is_default' => $data['is_default'] ?? null,
+                    'contacts' => $data['contacts'] ??null,
                 ];
 
                 $iData = array_null($iData);
