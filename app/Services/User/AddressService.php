@@ -38,6 +38,7 @@ class AddressService
                     'village_id' => $data['village_id'],
                     'contacts' => $data['contacts'],
                     'address' => $data['address'],
+                    'sex' => $data['sex'],
                     'mobile' => $data['mobile'],
                     'is_default' => $data['is_default'],
                 ];
@@ -72,6 +73,7 @@ class AddressService
                     'address' => $data['address'] ?? null,
                     'mobile' => $data['mobile'] ?? null,
                     'is_default' => $data['is_default'] ?? null,
+                    'sex' => $data['sex'] ?? null,
                     'contacts' => $data['contacts'] ??null,
                 ];
 

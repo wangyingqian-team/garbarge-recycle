@@ -94,6 +94,7 @@ class UserController extends BaseController
             'contacts' => $this->request->get('contacts'),
             'mobile' => $this->request->get('mobile'),
             'address' => $this->request->get('address'),
+            'sex' => $this->request->get('sex'),
             'is_default' => $this->request->get('is_default', false)
         ];
         /** @var AddressService $addressService */
@@ -116,6 +117,7 @@ class UserController extends BaseController
             'contacts' => $this->request->get('contacts'),
             'mobile' => $this->request->get('mobile'),
             'address' => $this->request->get('address'),
+            'sex' => $this->request->get('sex'),
             'is_default' => $this->request->get('is_default', false)
         ];
 
