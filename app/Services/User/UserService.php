@@ -59,9 +59,10 @@ class UserService
     }
 
 
-    public function getUserDetail($openid)
+    public function getUserDetail($param)
     {
-        $userInfo = UserModel::query()->where('openid', $openid)->macroFirst();
+        $where = is_int($param) ?  ['id' => $param] : ['openid' => $param];
+        $userInfo = UserModel::query()->where($where)->macroFirst();
         //等级进度
         $userInfo['exp_progress'] = $userInfo['level'] == 9 ? 1 : round($userInfo['exp'] / UserConst::LEVEL_EXP[$userInfo['level'] + 1]);
         //地址
