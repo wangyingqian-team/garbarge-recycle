@@ -37,8 +37,9 @@ class JifenOrderService
             throw new RestfulException('用户积分不足');
         }
 
+        $exchangeOrderNo = generate_order_no('E');
         $iData = [
-            'order_no' => generate_order_no('E'),
+            'order_no' => $exchangeOrderNo,
             'user_id' => $userId,
             'title' => $item['title'],
             'jifen_need' => $jifenNeed,
@@ -60,7 +61,7 @@ class JifenOrderService
         // 下单异步事件推送.
         event(new JifenOrderCreateEvent($iData));
 
-        return true;
+        return $exchangeOrderNo;
     }
 
     /**
