@@ -237,6 +237,7 @@ class GarbageRecycleController extends BaseController
 //        $recyclerId = $this->recyclerId;
         $page = $this->page;
         $pageSize = $this->pageSize;
+        $status = $this->request->get('status');
         $date = $this->request->get('date');
 
 //        $where = ['recycler_id' => $recyclerId];
