@@ -69,27 +69,25 @@ Route::get('invite/sub_list', 'UserController@getSubInvitationList');
 //抽奖
 Route::post('chou', 'UserController@chou');
 
-/**
- * ===============================
- * 积分商城相关
- * =================================
- */
-//积分商品列表
+/*
+|--------------------------------------------------------------------------
+| 积分商城相关
+|--------------------------------------------------------------------------
+*/
+// 积分商品列表
 Route::get('jifen/item/list', 'JifenController@getItemList');
-//积分商品详情
-Route::get('jifen/item/detail', 'JifenController@getItemDetail');
-//兑换
+
+//// 积分商品详情
+//Route::get('jifen/item/detail', 'JifenController@getItemDetail');
+
+// 兑换
 Route::post('jifen/order/create', 'JifenController@createOrder');
-//积分订单列表
-Route::get('jifen/order/list', 'JifenController@getOrderList');
-//积分订单详情
-Route::get('jifen/order/detail', 'JifenController@getOrderDetail');
 
-
-
-
-
-
+//// 积分订单列表
+//Route::get('jifen/order/list', 'JifenController@getOrderList');
+//
+//// 积分订单详情
+//Route::get('jifen/order/detail', 'JifenController@getOrderDetail');
 
 /*
 |--------------------------------------------------------------------------
@@ -132,8 +130,12 @@ Route::get('recycle/order/cancelByRecycler', 'GarbageRecycleController@cancelRec
 // 用户爽约取消回收订单
 Route::get('recycle/order/cancelByBp', 'GarbageRecycleController@cancelRecycleOrderByBp');
 
-// 回收员回收订单列表
+// todo
+// 回收员回收订单列表（根据日期筛选）
 Route::get('recycle/recycler/order/list', 'GarbageRecycleController@getRecyclerRecycleOrderList');
 
 // 回收员回收订单详情
 Route::get('recycle/recycler/order/info', 'GarbageRecycleController@getRecyclerRecycleOrderInfo');
+
+// 回收员修改预约时间（回收员修改预约时间、订单满了可插队）
+Route::put('recycle/recycler/modify', 'GarbageRecycleController@modifyRecycleOrderAppointTime');

@@ -10,6 +10,11 @@ use App\Supports\Constant\AssertConst;
 class JifenController extends BaseController
 {
 
+    /**
+     * 商品列表.
+     *
+     * @return mixed
+     */
     public function getItemList()
     {
         $title = $this->request->get('title');
@@ -22,7 +27,7 @@ class JifenController extends BaseController
         $data = app(JifenItemService::class)->getItemList(
             $where,
             ['*'],
-            ['jifen_need' => 'desc'],
+            ['create_time' => 'desc'],
             $this->page,
             $this->pageSize
         );
@@ -40,14 +45,18 @@ class JifenController extends BaseController
         return $this->success($data);
     }
 
+    /**
+     * 积分兑换商品下单.
+     *
+     * @return mixed
+     * @throws \Throwable
+     */
     public function createOrder()
     {
         $itemId = $this->request->get('item_id');
-        $num = $this->request->get('num');
-        $jifen = $this->request->get('jifen');
-        $deliveryType = $this->request->get('delivery_type',  AssertConst::JI_FEN_DELIVERY_TWO);
+        $num = $this->request->get('num', 1);
 
-        app(JifenOrderService::class)->create($this->userId, $itemId, $num, $jifen, $deliveryType);
+        app(JifenOrderService::class)->create(intval($this->userId), $itemId, $num);
 
         return $this->success();
     }

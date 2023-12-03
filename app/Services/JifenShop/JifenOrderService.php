@@ -32,6 +32,7 @@ class JifenOrderService
         $jifenNeed = $item['jifen_need'];
         $jifenCost = $num * $jifenNeed;
         $userInfo = app(UserService::class)->getUserDetail($userId);
+
         if ($userInfo['asserts']['jifen'] < $jifenCost) {
             throw new RestfulException('用户积分不足');
         }
@@ -43,7 +44,7 @@ class JifenOrderService
             'jifen_need' => $jifenNeed,
             'num' => $num,
             'jifen_cost' => $jifenCost,
-            'status' =>  JiFenConst::JI_FEN_ORDER_STATUS_EXCHANGED
+            'status' =>  JiFenConst::JI_FEN_ORDER_STATUS_UN_EXCHANGED
         ];
 
         DB::transaction(function () use($iData, $itemId, $item) {
@@ -52,11 +53,11 @@ class JifenOrderService
             // 扣减积分.
             app(AssertService::class)->decreaseJifen($iData['user_id'], $iData['jifen_cost']);
             // 发放兑换券（一年有效期）.
-            $expireTime = 365 * 24 * 3600;
+            $expireTime = date('Y-m-d', strtotime('+1 year'));
             app(CouponService::class)->obtainCoupon($iData['user_id'], $item['coupon_id'], $expireTime);
         });
 
-
+        // 下单异步事件推送.
         event(new JifenOrderCreateEvent($iData));
 
         return true;

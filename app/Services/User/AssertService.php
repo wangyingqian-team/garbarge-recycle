@@ -21,17 +21,17 @@ class AssertService
         $je = UserConst::LEVEL_EQUITY['ji_fen_extra'][$userInfo['level']];
         $j = round($jifen * $je);
         $jifen += $j;
-        $assert = UserAssetsModel::query()->where('id', $userId)->macroFirst();
+        $assert = UserAssetsModel::query()->where('user_id', $userId)->macroFirst();
         $jifen += $assert['jifen'];
-        UserAssetsModel::query()->where('id', $userId)->update(['jifen' => $jifen]);
+        UserAssetsModel::query()->where('user_id', $userId)->update(['jifen' => $jifen]);
     }
 
     //扣减积分
     public function decreaseJifen($userId, $jifen)
     {
-        $assert = UserAssetsModel::query()->where('id', $userId)->macroFirst();
+        $assert = UserAssetsModel::query()->where('user_id', $userId)->macroFirst();
         $assert['jifen'] -= $jifen ;
-        UserAssetsModel::query()->where('id', $userId)->update(['jifen' => $jifen]);
+        UserAssetsModel::query()->where('user_id', $userId)->update(['jifen' => $assert['jifen']]);
         return true;
     }
 
