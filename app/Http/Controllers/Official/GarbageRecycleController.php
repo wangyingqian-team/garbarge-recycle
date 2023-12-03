@@ -234,13 +234,18 @@ class GarbageRecycleController extends BaseController
      */
     public function getRecyclerRecycleOrderList()
     {
-        $recyclerId = $this->recyclerId;
+//        $recyclerId = $this->recyclerId;
         $page = $this->page;
         $pageSize = $this->pageSize;
+        $date = $this->request->get('date');
 
-        $where = ['recycler_id' => $recyclerId];
+//        $where = ['recycler_id' => $recyclerId];
         !empty($status) && $where['status'] = $status;
-        $select = ['*', 'recycler.*'];
+        if (!empty($date)) {
+            $where['appoint_start_time|>='] = date("Y-m-d 00:00:00", strtotime($date));
+            $where['appoint_start_time|<='] = date('Y-m-d 23:59:59', strtotime($date));
+        }
+        $select = ['*', 'details.*'];
         $orderBy = ['create_time' => 'desc'];
 
         $result = app(GarbageRecycleOrderService::class)->getGarbageRecycleOrderList($where, $select, $orderBy, $page, $pageSize);
@@ -261,7 +266,7 @@ class GarbageRecycleController extends BaseController
         $result = app(GarbageRecycleOrderService::class)->getGarbageRecycleOrderInfo([
             'order_no' => $orderNo,
             'recycler_id' => $recyclerId
-        ]);
+        ], ['*', 'details.*']);
 
         return $this->success($result);
     }

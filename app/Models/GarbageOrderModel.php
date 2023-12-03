@@ -34,7 +34,7 @@ class GarbageOrderModel extends Model
 
     public function details()
     {
-        return $this->hasMany(GarbageOrderModel::class, 'garbage_order_no', 'order_no');
+        return $this->hasMany(GarbageOrderDetailModel::class, 'garbage_order_no', 'order_no');
     }
 
 }
