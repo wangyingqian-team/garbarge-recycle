@@ -56,9 +56,9 @@ class JifenController extends BaseController
         $itemId = $this->request->get('item_id');
         $num = $this->request->get('num', 1);
 
-        app(JifenOrderService::class)->create(intval($this->userId), $itemId, $num);
+        $result = app(JifenOrderService::class)->create(intval($this->userId), $itemId, $num);
 
-        return $this->success();
+        return $this->success($result);
     }
 
     public function getOrderList()
