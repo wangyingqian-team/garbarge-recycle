@@ -37,9 +37,9 @@ class AssertService
 
     //增加信用值
     public function increaseCredit($userId, $credit) {
-        $assert = UserAssetsModel::query()->where('id', $userId)->macroFirst();
+        $assert = UserAssetsModel::query()->where('user_id', $userId)->macroFirst();
         $credit += $assert['credit'];
-        UserAssetsModel::query()->where('id', $userId)->update(['credit' => $credit]);
+        UserAssetsModel::query()->where('user_id', $userId)->update(['credit' => $credit]);
         return true;
     }
 
@@ -47,7 +47,7 @@ class AssertService
     public function decreaseCredit($userId, $credit) {
         $assert = UserAssetsModel::query()->where('user_id', $userId)->macroFirst();
         $assert['credit'] -= $credit;
-        UserAssetsModel::query()->where('user_id', $userId)->update(['credit' => $credit]);
+        UserAssetsModel::query()->where('user_id', $userId)->update(['credit' => $assert['credit']]);
         return true;
     }
 
