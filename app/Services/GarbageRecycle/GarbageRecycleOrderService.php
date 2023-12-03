@@ -373,10 +373,10 @@ class GarbageRecycleOrderService
      */
     public function cancelRecycleOrderByUser($orderNo)
     {
-        // 判断用户此时是否可以操作取消.
+        // 判断用户此时是否可以操作取消（只有待接单、已接单可以取消）.
         $orderInfo = $this->getGarbageRecycleOrderInfo(['order_no' => $orderNo], ['*']);
-        if ($orderInfo['status'] != GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_RESERVED) {
-            throw new RestfulException('该回收订单已经被接单，不可取消！');
+        if ($orderInfo['status'] != GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_RESERVED && $orderInfo['status'] != GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_RECEIVED) {
+            throw new RestfulException('该回收订单正在回收中，不可取消！');
         }
         if (strtotime($orderInfo['appoint_start_time']) <= time()) {
             throw new RestfulException('当前已经到了预约回收时间，不可取消！');
@@ -387,6 +387,8 @@ class GarbageRecycleOrderService
             'status' => GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_USER_CANCELED,
             'cancel_time' => date("Y-m-d H:i:s", time())
         ]);
+
+        // 对于已接单的订单，取消扣减用户信用分.
 
         // 发起订单取消异步事件.
         $this->pushAsyncEventForCancelRecycleOrder($orderInfo);
@@ -411,12 +413,12 @@ class GarbageRecycleOrderService
         }
 
         // 取消订单（回收员主动取消）.
-        GarbageOrderModel::query()->where(['order_no' => $orderInfo])->update([
+        GarbageOrderModel::query()->where(['order_no' => $orderNo])->update([
             'status' => GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_RECYCLER_CANCELED,
             'cancel_time' => date("Y-m-d H:i:s", time())
         ]);
 
-        // 补偿用户5元代金券
+        // 补偿用户5元代金券（逻辑调整为：跳转到回收页，给一个领取5元代金券的页面入口，24小时有效）
 //        $userId = $orderInfo['user_id'];
 //        app(CouponService::class)->obtainCoupon($userId, ActivityConst::COUPON_ID_5_YUAN, null);
 
@@ -443,13 +445,13 @@ class GarbageRecycleOrderService
         }
 
         // 取消订单（用户爽约取消）.
-        GarbageOrderModel::query()->where(['order_no' => $orderInfo])->update([
+        GarbageOrderModel::query()->where(['order_no' => $orderNo])->update([
             'status' => GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_BREAK_PROMISE_CANCELED,
             'cancel_time' => date("Y-m-d H:i:s", time())
         ]);
 
         // 扣减用户信用分.
-        $userId = $orderInfo['userId'];
+        $userId = $orderInfo['user_id'];
         app(AssertService::class)->decreaseCredit($userId, 10);
 
         // 发起订单取消异步事件.
@@ -470,7 +472,7 @@ class GarbageRecycleOrderService
     public function cancelRecycleOrderBySystem($orderNo)
     {
         $orderInfo = $this->getGarbageRecycleOrderInfo(['order_no' => $orderNo]);
-        if ($orderInfo['status'] != GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_RECEIVED || $orderInfo['status'] != GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_RECEIVED) {
+        if ($orderInfo['status'] != GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_RESERVED && $orderInfo['status'] != GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_RECEIVED) {
             throw new RestfulException('该订单不属于回收员未处理状态，不可系统取消！');
         }
 

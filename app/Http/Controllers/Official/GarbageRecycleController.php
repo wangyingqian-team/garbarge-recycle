@@ -95,6 +95,20 @@ class GarbageRecycleController extends BaseController
     }
 
     /**
+     * 回收员设置订单分类明细.
+     *
+     * @return mixed
+     */
+    public function setRecycleOrderDetails()
+    {
+        $requestBody = $this->request->all();
+        $orderNo = $requestBody['order_no'];
+        $orderDetails = $requestBody['order_details'];
+        $result = app(GarbageRecycleOrderService::class)->setGarbageRecycleOrderDetails($orderNo, $orderDetails);
+        return $this->success($result);
+    }
+
+    /**
      * 回收员订单完成.
      *
      * @return mixed
@@ -116,26 +130,26 @@ class GarbageRecycleController extends BaseController
      * @return mixed
      *
      */
-    public function cancelRecycleOrderByUserReserve()
+    public function cancelRecycleOrderByUser()
     {
         $orderNo = $this->request->get('order_no');
 
-        $result = app(GarbageRecycleOrderService::class)->cancelRecycleOrderByUserReserve($orderNo);
+        $result = app(GarbageRecycleOrderService::class)->cancelRecycleOrderByUser($orderNo);
 
         return $this->success($result);
     }
 
     /**
-     * 用户取消回收订单（用户确认取消）.
+     * 回收员取消回收订单（用户爽约取消）.
      *
      * @return mixed
      *
      */
-    public function cancelRecycleOrderByUserConfirm()
+    public function cancelRecycleOrderByBp()
     {
         $orderNo = $this->request->get('order_no');
 
-        $result = app(GarbageRecycleOrderService::class)->cancelRecycleOrderByUserConfirm($orderNo);
+        $result = app(GarbageRecycleOrderService::class)->cancelRecycleOrderByBreakPromise($orderNo);
 
         return $this->success($result);
     }
