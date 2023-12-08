@@ -262,12 +262,10 @@ class GarbageRecycleController extends BaseController
      */
     public function getRecyclerRecycleOrderInfo()
     {
-        $recyclerId = $this->recyclerId;
         $orderNo = $this->request->get('order_no');
         $result = app(GarbageRecycleOrderService::class)->getGarbageRecycleOrderInfo([
-            'order_no' => $orderNo,
-            'recycler_id' => $recyclerId
-        ], ['*', 'details.*']);
+            'order_no' => $orderNo
+        ], ['*', 'details.*', 'address.*']);
 
         return $this->success($result);
     }

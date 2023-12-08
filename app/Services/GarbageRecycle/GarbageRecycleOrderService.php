@@ -523,7 +523,7 @@ class GarbageRecycleOrderService
      */
     public function getGarbageRecycleOrderInfo($where, $select = ['*'])
     {
-        return GarbageOrderModel::query()->macroWhere($where)->select($select)->macroFirst();
+        return GarbageOrderModel::query()->macroWhere($where)->macroSelect($select)->macroFirst();
     }
 
     /**

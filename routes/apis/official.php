@@ -133,7 +133,6 @@ Route::get('recycle/order/cancelByBp', 'GarbageRecycleController@cancelRecycleOr
 // 回收员回收订单列表（根据日期筛选）
 Route::get('recycle/recycler/order/list', 'GarbageRecycleController@getRecyclerRecycleOrderList');
 
-// todo
 // 回收员回收订单详情
 Route::get('recycle/recycler/order/info', 'GarbageRecycleController@getRecyclerRecycleOrderInfo');
 
