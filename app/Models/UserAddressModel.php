@@ -23,7 +23,7 @@ class UserAddressModel extends Model
 
     public $timestamps = false;
 
-    protected $appends = ['village_name', 'full_village_name'];
+    protected $appends = ['village_name', 'address_detail'];
 
     public function getVillageNameAttribute()
     {
@@ -31,10 +31,10 @@ class UserAddressModel extends Model
         return app(VillageService::class)->getVillageInfo($villageId)['name'];
     }
 
-    public function getFullVillageNameAttribute()
+    public function getAddressDetailAttribute()
     {
         $villageId = $this->attributes['village_id'];
         $villageInfo = app(VillageService::class)->getVillageInfo($villageId);
-        return $villageInfo['province'] .  $villageInfo['city'] . $villageInfo['area'] . ' ' . $villageInfo['name'];
+        return $villageInfo['province'] .  $villageInfo['city'] . $villageInfo['area'] . ' ' . $villageInfo['name'] . $this->attributes['address'];
     }
 }
