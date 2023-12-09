@@ -28,13 +28,13 @@ class UserAddressModel extends Model
     public function getVillageNameAttribute()
     {
         $villageId = $this->attributes['village_id'];
-        return app(VillageService::class)->getVillageInfo($villageId)['name'];
+        return app(VillageService::class)->getVillageInfo($villageId)['name'] ?? '';
     }
 
     public function getAddressDetailAttribute()
     {
         $villageId = $this->attributes['village_id'];
         $villageInfo = app(VillageService::class)->getVillageInfo($villageId);
-        return $villageInfo['province'] .  $villageInfo['city'] . $villageInfo['area'] . ' ' . $villageInfo['name'] . $this->attributes['address'];
+        return empty($villageInfo) ? '' : $villageInfo['province'] .  $villageInfo['city'] . $villageInfo['area'] . ' ' . $villageInfo['name'] . $this->attributes['address'];
     }
 }
