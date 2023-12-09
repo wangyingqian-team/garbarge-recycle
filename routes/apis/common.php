@@ -5,3 +5,6 @@ Route::post('upload', 'ImageController@upload');
 
 //公告
 Route::get('announcement', 'NotifyController@announcement');
+
+// webhook
+Route::get('webhook', 'WebHookController@pushEvent');
