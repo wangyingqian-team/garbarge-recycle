@@ -20,7 +20,7 @@ class GarbageRecycleController extends BaseController
             'id', 'name', 'order', 'create_time', 'update_time', 'type.id', 'type.category_id', 'type.unit_name',
             'type.name', 'type.icon', 'type.recycling_price', 'type.create_time', 'type.update_time'
         ];
-        $filters = [];
+        $filters = ['id|!=' => GarbageRecycleConst::GARBAGE_CATEGORY_TYPE_ID_OTHERS];
         $orderBys = ['order' => 'asc'];
 
 
