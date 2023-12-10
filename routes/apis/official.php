@@ -137,4 +137,4 @@ Route::get('recycle/recycler/order/list', 'GarbageRecycleController@getRecyclerR
 Route::get('recycle/recycler/order/info', 'GarbageRecycleController@getRecyclerRecycleOrderInfo');
 
 // 回收员修改预约时间（回收员修改预约时间、订单满了可插队）
-Route::put('recycle/recycler/modify', 'GarbageRecycleController@modifyRecycleOrderAppointTime');
+Route::put('recycle/recycler/order/modify', 'GarbageRecycleController@modifyRecycleOrderAppointTime');

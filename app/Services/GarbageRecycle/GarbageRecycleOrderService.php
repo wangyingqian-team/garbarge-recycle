@@ -550,6 +550,53 @@ class GarbageRecycleOrderService
     }
 
     /**
+     * 修改预约单时间.
+     *
+     * @param string $orderNo
+     * @param string $newRecycleDate
+     * @param string $newRecyclingStartTime
+     * @param string $newRecyclingEndTime
+     * @return bool
+     */
+    public function modifyRecycleOrderAppointTime($orderNo, $newRecycleDate, $newRecyclingStartTime, $newRecyclingEndTime)
+    {
+        $orderInfo = $this->getGarbageRecycleOrderInfo(['order_no' => $orderNo]);
+
+        // 校验修改时间必须在当前预约时间之后.
+        $oldRecycleStartTime = $orderInfo['appoint_start_time'];
+        $oldRecycleDate = date("Y-m-d", strtotime($oldRecycleStartTime));
+        $oldRecyclePeriod = date('H:i', strtotime($orderInfo['appoint_start_time'])) . '-' . date('H:i', strtotime($orderInfo['appoint_end_time']));
+        if (strtotime($newRecyclingStartTime) >= strtotime($newRecyclingEndTime)) {
+            throw new RestfulException('回收开始时间必须小于回收结束时间！');
+        }
+        if (strtotime($oldRecycleStartTime) >= strtotime($newRecycleDate . ' ' . $newRecyclingStartTime)) {
+            throw new RestfulException('修改时间必须在当前预约时间之后！');
+        }
+
+        // 修改订单时间.
+        GarbageOrderModel::query()->where('order_no', $orderNo)->update([
+            'appoint_start_time' => $newRecycleDate . ' ' . $newRecyclingStartTime,
+            'appoint_end_time' => $newRecycleDate . ' ' . $newRecyclingEndTime
+        ]);
+
+        // 修改时间以后，需要修改redis订单数据（通过订单异步事件实现）.
+        $newRecyclePeriod = $newRecyclingStartTime . '-' . $newRecyclingEndTime;
+        event(new GarbageRecycleOrderCreateEvent([
+            'order_no' => $orderNo,
+            'recycle_date' => $newRecycleDate,
+            'recycle_period' => $newRecyclePeriod
+        ]));
+
+        event(new GarbageRecycleOrderCancelEvent([
+            'order_no' => $orderNo,
+            'recycle_date' => $oldRecycleDate,
+            'recycle_period' => $oldRecyclePeriod
+        ]));
+
+        return true;
+    }
+
+    /**
      * 发起回收订单取消异步事件.
      *
      * @param array $orderInfo

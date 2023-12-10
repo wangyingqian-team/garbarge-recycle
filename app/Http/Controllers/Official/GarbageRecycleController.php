@@ -270,4 +270,21 @@ class GarbageRecycleController extends BaseController
         return $this->success($result);
     }
 
+    /**
+     * 修改预约时间.
+     */
+    public function modifyRecycleOrderAppointTime()
+    {
+        $orderNo = $this->request->get('order_no');
+        $newRecycleDate = $this->request->get('new_recycle_date');
+        $newRecyclingStartTime = $this->request->get('new_recycle_start_time');
+        $newRecyclingEndTime = $this->request->get('new_recycle_end_time');
+
+        $result = app(GarbageRecycleOrderService::class)->modifyRecycleOrderAppointTime(
+            $orderNo, $newRecycleDate, $newRecyclingStartTime, $newRecyclingEndTime
+        );
+
+        return $this->success($result);
+    }
+
 }

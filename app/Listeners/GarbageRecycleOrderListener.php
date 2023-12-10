@@ -52,7 +52,7 @@ class GarbageRecycleOrderListener
 
         // 指定回收员在指定时间段的回收单数-1
         $redis = Redis::connection('recycle');
-        $recyclerOrderPeriodCountKey = RedisKeyConst::THROW_RECYCLER_ORDER_COUNT_PREFIX . ':' . $recyclingDate;
+        $recyclerOrderPeriodCountKey = RedisKeyConst::THROW_RECYCLER_ORDER_COUNT_PREFIX . $recyclingDate;
         $redis->hincrby($recyclerOrderPeriodCountKey, $recyclePeriod, -1);
 
         // todo 修改优惠券状态
