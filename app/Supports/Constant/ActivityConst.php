@@ -38,4 +38,22 @@ class ActivityConst
 
     // 积分兑换比例（支付1元兑换100积分）
     const JIFEN_EXCHANGE_AMOUNT = 100;
+
+    // 首单福利优惠券：5元代金券
+    const FIRST_ORDER_COUPON_ID = 13;
+    const FIRST_ORDER_COUPON_NAME = '5元代金券';
+
+    // 多卖多送优惠券规则
+    const SELL_GIVE_COUPON_RULES = [
+        // 完成2次订单可领取2元代金券
+        array("order_quantity" => 2, "coupon_id" => 12, "coupon_name" => '2元代金券'),
+        // 完成5次订单可领取5元代金券
+        array("order_quantity" => 5, "coupon_id" => 13, "coupon_name" => '5元代金券'),
+        // 完成10次订单可领取10元代金券
+        array("order_quantity" => 10, "coupon_id" => 14, "coupon_name" => '10元代金券'),
+        // 完成15次订单可领取15元代金券
+        array("order_quantity" => 15, "coupon_id" => 15, "coupon_name" => '15元代金券'),
+        // 完成20次订单可领取20元代金券
+        array("order_quantity" => 20, "coupon_id" => 16, "coupon_name" => '20元代金券')
+    ];
 }

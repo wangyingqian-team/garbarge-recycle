@@ -527,6 +527,17 @@ class GarbageRecycleOrderService
     }
 
     /**
+     * 通用查询订单数量.
+     *
+     * @param $where array 查询条件
+     * @return int 符合条件的订单数
+     */
+    public function getGarbageRecycleOrderCount($where)
+    {
+        return GarbageOrderModel::query()->macroWhere($where)->count();
+    }
+
+    /**
      * 用户交易信息通知入队.
      *
      * @param $userId

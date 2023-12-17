@@ -70,5 +70,14 @@ class RedisKeyConst
      */
     const USER_INCOME = 'user_income';
 
+    /**
+     * 首单福利是否已领取key前缀.
+     */
+    const FIRST_ORDER_WELFARE_RECEIVED_PREFIX = 'activity:welfare:firstOrder:';
+
+    /**
+     * 多卖多送是否已领取key前缀.
+     */
+    const SELL_GIVE_RULE_PREFIX = 'activity:welfare:sellGive:quantity_';
 
 }

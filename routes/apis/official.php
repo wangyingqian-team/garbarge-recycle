@@ -69,6 +69,9 @@ Route::get('invite/sub_list', 'UserController@getSubInvitationList');
 //抽奖
 Route::post('chou', 'UserController@chou');
 
+// 福利中心
+Route::get('activity/welfare', 'UserController@welfareCenter');
+
 /*
 |--------------------------------------------------------------------------
 | 积分商城相关

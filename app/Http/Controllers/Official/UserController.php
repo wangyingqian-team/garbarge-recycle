@@ -261,4 +261,14 @@ class UserController extends BaseController
     public function sendSms() {
         $mobile = $this->request->get('mobile');
     }
+
+    /**
+     * 福利中心.
+     *
+     * @return mixed
+     */
+    public function welfareCenter()
+    {
+        return $this->success(app(CouponService::class)->welfareCenter($this->userId));
+    }
 }
