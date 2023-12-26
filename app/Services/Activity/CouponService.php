@@ -172,6 +172,7 @@ class CouponService
             }
 
             $sellGiveDetails[] = [
+                'coupon_id' => $couponId,
                 'coupon_name' => $couponName,
                 'welfare_text' => $welfareText
             ];
@@ -179,6 +180,7 @@ class CouponService
 
         return [
             'first_order_details' => [
+                'coupon_id' => ActivityConst::FIRST_ORDER_COUPON_ID,
                 'coupon_name' => ActivityConst::FIRST_ORDER_COUPON_NAME,
                 'welfare_text' => $firstOrderWelfareText
             ],
