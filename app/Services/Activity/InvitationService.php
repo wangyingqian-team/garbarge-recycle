@@ -72,7 +72,7 @@ class InvitationService
     {
         return InvitationRelationModel::query()
             ->macroWhere(['superior_id'=> $userId,'is_active'=>1])
-            ->macroSelect(["*",'subUserInfo.id','subUserInfo.nickname','subUserInfo.level','subUserInfo.avatar'])
+            ->macroSelect(["*",'subUserInfo.id','subUserInfo.nickname','subUserInfo.level','subUserInfo.avatar','subUserInfo.mobile'])
             ->orderBy('create_time','desc')
             ->get();
     }
