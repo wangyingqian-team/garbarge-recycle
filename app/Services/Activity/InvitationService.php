@@ -59,7 +59,7 @@ class InvitationService
      */
     public function getUserInvitation($userId)
     {
-        return InvitationRelationModel::query()->macroWhere(['user_id'=> $userId,'is_active'=>1])->macroSelect(["*",'supUserInfo.id','supUserInfo.nickname','supUserInfo.level','supUserInfo.avatar'])->macroFirst();
+        return InvitationRelationModel::query()->macroWhere(['user_id'=> $userId,'is_active'=>1])->macroSelect(["*",'supUserInfo.id','supUserInfo.nickname','supUserInfo.level','supUserInfo.avatar','supUserInfo.mobile'])->macroFirst();
     }
 
     /**
