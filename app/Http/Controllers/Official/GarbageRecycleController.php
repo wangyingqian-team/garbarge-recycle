@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Official;
 
 use App\Services\GarbageRecycle\GarbageCategoryService;
 use App\Services\GarbageRecycle\GarbageRecycleOrderService;
+use App\Services\User\UserService;
 use App\Supports\Constant\GarbageRecycleConst;
 
 class GarbageRecycleController extends BaseController
@@ -187,10 +188,14 @@ class GarbageRecycleController extends BaseController
     {
         $userId = $this->userId;
         $orderNo = $this->request->get('order_no');
+        $select = ['*', 'address.*'];
         $result = app(GarbageRecycleOrderService::class)->getGarbageRecycleOrderInfo([
             'order_no' => $orderNo,
             'user_id' => $userId
-        ]);
+        ], $select);
+
+        $recyclerInfo = app(UserService::class)->getUserDetail(GarbageRecycleConst::RECYCLER_ID);
+        $result['recycler'] = $recyclerInfo;
 
         return $this->success($result);
     }
