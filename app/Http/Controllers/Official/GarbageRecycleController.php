@@ -194,7 +194,7 @@ class GarbageRecycleController extends BaseController
             'user_id' => $userId
         ], $select);
 
-        $recyclerInfo = app(UserService::class)->getUserDetail(GarbageRecycleConst::RECYCLER_ID);
+        $recyclerInfo = app(UserService::class)->getUserBasicInfo(GarbageRecycleConst::RECYCLER_ID);
         $result['recycler'] = $recyclerInfo;
 
         return $this->success($result);

@@ -58,6 +58,11 @@ class UserService
         return UserModel::query()->where('id', $data['user_id'])->update($val);
     }
 
+    public function getUserBasicInfo($userId)
+    {
+        return UserModel::query()->whereKey($userId)->macroFirst();
+    }
+
 
     public function getUserDetail($param)
     {
