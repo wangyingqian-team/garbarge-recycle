@@ -56,4 +56,7 @@ class ActivityConst
         // 完成20次订单可领取20元代金券
         array("order_quantity" => 20, "coupon_id" => 16, "coupon_name" => '20元代金券')
     ];
+
+    // 用户补偿优惠券: 5元代金券
+    const ORDER_COMPENSATE_COUPON_ID = 13;
 }

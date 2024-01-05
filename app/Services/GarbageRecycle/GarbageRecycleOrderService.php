@@ -18,6 +18,7 @@ use App\Services\User\UserService;
 use App\Supports\Constant\ActivityConst;
 use App\Supports\Constant\GarbageRecycleConst;
 use App\Supports\Constant\RedisKeyConst;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Redis;
 
 class GarbageRecycleOrderService
@@ -603,6 +604,35 @@ class GarbageRecycleOrderService
             'recycle_date' => $oldRecycleDate,
             'recycle_period' => $oldRecyclePeriod
         ]));
+
+        return true;
+    }
+
+    /**
+     * 领取补偿.
+     *
+     * @param string $orderNo
+     * @return bool
+     */
+    public function receiveCompensate($orderNo)
+    {
+        $redis = Redis::connection('recycle');
+        $redisKey = RedisKeyConst::ORDER_COMPENSATE_PREFIX . $orderNo;
+
+        $orderInfo = $this->getGarbageRecycleOrderInfo(['order_no' => $orderNo]);
+        if ($orderInfo['status'] != GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_RECYCLER_CANCELED && $orderInfo['status'] != GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_TIMEOUT_CANCELED) {
+            throw new RestfulException('当前订单状态不满足领取补偿条件！');
+        }
+
+        $checkReceive = $redis->get($redisKey);
+        if (!empty($checkReceive) && $checkReceive == 1) {
+            throw new RestfulException('用户已领取过补偿，请勿重复领取！');
+        }
+
+        $userId = $orderInfo['user_id'];
+        $expire = Carbon::now()->addDays(30);
+        app(CouponService::class)->obtainCoupon($userId,ActivityConst::ORDER_COMPENSATE_COUPON_ID, $expire);
+        $redis->set($redisKey, 1);
 
         return true;
     }

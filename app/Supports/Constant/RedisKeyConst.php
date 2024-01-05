@@ -80,4 +80,9 @@ class RedisKeyConst
      */
     const SELL_GIVE_RULE_PREFIX = 'activity:welfare:sellGive:quantity_';
 
+    /**
+     * 用户补偿是否已领取.
+     */
+    const ORDER_COMPENSATE_PREFIX = 'recycle:compensate:order_';
+
 }

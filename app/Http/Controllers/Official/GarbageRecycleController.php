@@ -292,4 +292,13 @@ class GarbageRecycleController extends BaseController
         return $this->success($result);
     }
 
+    /**
+     * 用户领取补偿.
+     */
+    public function receiveCompensate()
+    {
+        $orderNo = $this->request->get('order_no');
+        return $this->success(app(GarbageRecycleOrderService::class)->receiveCompensate($orderNo));
+    }
+
 }

@@ -141,3 +141,6 @@ Route::get('recycle/recycler/order/info', 'GarbageRecycleController@getRecyclerR
 
 // 回收员修改预约时间（回收员修改预约时间、订单满了可插队）
 Route::put('recycle/recycler/order/modify', 'GarbageRecycleController@modifyRecycleOrderAppointTime');
+
+// 用户领取补偿
+Route::get('recycle/compensate/receive', 'GarbageRecycleController@receiveCompensate');
