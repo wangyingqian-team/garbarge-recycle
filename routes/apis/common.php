@@ -8,3 +8,9 @@ Route::get('announcement', 'NotifyController@announcement');
 
 // webhook
 Route::get('webhook', 'WebHookController@pushEvent');
+
+//图形验证码
+Route::post('captcha', 'ImageController@captcha');
+
+//短信验证码
+Route::post('sms', 'ImageController@sms');

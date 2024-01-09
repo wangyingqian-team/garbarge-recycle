@@ -24,7 +24,8 @@
         "qiniu/php-sdk": "^7.2",
         "wangyingqian/alichat": "master",
         "wi1dcard/alipay-sdk": "^1.3",
-        "yly-openapi/yly-openapi-sdk": "dev-master"
+        "yly-openapi/yly-openapi-sdk": "dev-master",
+        "gregwar/captcha": "*"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.6",

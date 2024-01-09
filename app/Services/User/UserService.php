@@ -16,16 +16,16 @@ use Illuminate\Support\Facades\Redis;
 class UserService
 {
 
-    public function create($data)
+    public function create($mobile)
     {
         //基本信息
         $val = [
-            'openid' => $data['openid'],
-            'nickname' => $data['nickname'],
-            'sex' => $data['sex'],
-            'avatar' => $data['headimgurl'],
-            'code' => strtoupper(md5($data['openid'])),
-            'mobile' => $data['mobile'] ?? '',
+           // 'openid' => $data['openid'],
+            'nickname' => generate_random_string(8),
+            'sex' => 3,
+            //'avatar' => $data['headimgurl'],
+            'code' => strtoupper(md5($mobile)),
+            'mobile' => $mobile,
         ];
 
         $userId = UserModel::query()->insertGetId($val);

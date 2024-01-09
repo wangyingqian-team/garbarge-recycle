@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Official;
 
 
+use App\Exceptions\RestfulException;
 use App\Services\Activity\ChouService;
 use App\Services\Activity\CouponService;
 use App\Services\Activity\InvitationService;
@@ -12,6 +13,7 @@ use App\Services\User\UserService;
 use App\Services\User\VillageService;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Redis;
 
 
 class UserController extends BaseController
@@ -24,12 +26,23 @@ class UserController extends BaseController
      */
     public function register()
     {
-        $wxService = app(WechatService::class);
-        $code = $this->request->get("code");
-        $openid = $wxService->getOpenid($code);
-        $userInfo = $wxService->getUserInfo($openid);
+//        $wxService = app(WechatService::class);
+//        $code = $this->request->get("code");
+//        $openid = $wxService->getOpenid($code);
+//        $userInfo = $wxService->getUserInfo($openid);
+        $mobile = $this->request->post('mobile');
+        if (!preg_match("/^1\d{10}$/", $mobile)) {
+            throw new RestfulException('手机号格式不对!,请输入正确手机号。');
+        }
 
-        $userId = app(UserService::class)->create($userInfo);
+        $code = $this->request->post('code');
+        $redis = Redis::connection('common');
+        $c = $redis->hget('sms_code',$mobile);
+        if ($c != $code) {
+            throw new RestfulException('短信验证码不对！请检查。');
+        }
+
+        $userId = app(UserService::class)->create($mobile);
 
         return $this->success($userId);
     }
@@ -43,7 +56,7 @@ class UserController extends BaseController
     {
         /** @var UserService $userService */
         $userService = app(UserService::class);
-        $openid = $this->request->get('openid');
+        $openid = $this->request->get('id');
 
         return $this->success($userService->getUserDetail($openid));
     }

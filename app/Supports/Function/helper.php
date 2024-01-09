@@ -265,3 +265,16 @@ if (!function_exists('is_time_overlap')) {
     }
 }
 
+if (!function_exists('generate_random_string')) {
+    function generate_random_string($length) {
+        $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $index = rand(0, strlen($characters) - 1);
+            $randomString .= $characters[$index];
+        }
+        return $randomString;
+    }
+
+}
+
