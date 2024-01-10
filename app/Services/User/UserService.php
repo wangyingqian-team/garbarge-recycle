@@ -91,6 +91,13 @@ class UserService
         return $userInfo;
     }
 
+
+    public function getUserIdByMobile ($mobile) {
+        $user = UserModel::query()->where('mobile', $mobile)->macroFirst();
+
+        return $user['id'] ?? null;
+    }
+
     /**
      * 签到
      *

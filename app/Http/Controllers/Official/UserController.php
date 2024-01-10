@@ -35,6 +35,14 @@ class UserController extends BaseController
             throw new RestfulException('手机号格式不对!,请输入正确手机号。');
         }
 
+        //token
+//        $token = $this->request->post('token');
+//        $checkToken = md5( $mobile.'@321');
+//        if ($token != $checkToken) {
+//
+//        }
+
+
         $code = $this->request->post('code');
         $redis = Redis::connection('common');
         $c = $redis->hget('sms_code',$mobile);
@@ -42,7 +50,8 @@ class UserController extends BaseController
             throw new RestfulException('短信验证码不对！请检查。');
         }
 
-        $userId = app(UserService::class)->create($mobile);
+        //是否注册
+        $userId = app(UserService::class)->getUserIdByMobile($mobile) ?:app(UserService::class)->create($mobile);
 
         return $this->success($userId);
     }
