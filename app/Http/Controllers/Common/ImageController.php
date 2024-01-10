@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Common;
 use App\Exceptions\RestfulException;
 use App\Http\Controllers\Controller;
 use App\Services\Common\AliOssService;
+use App\Supports\Constant\CommonConst;
 use App\Supports\Constant\ImageTypeConst;
 use Gregwar\Captcha\PhraseBuilder;
 use Illuminate\Support\Arr;
@@ -48,8 +49,9 @@ class ImageController extends Controller
     /**
      * 图形验证码
      *
-    */
-    public function captcha(){
+     */
+    public function captcha()
+    {
         $mobile = $this->request->post('mobile');
         if (!preg_match("/^1\d{10}$/", $mobile)) {
             throw new RestfulException('手机号格式不对!,请输入正确手机号。');
@@ -69,8 +71,7 @@ class ImageController extends Controller
         $redis->setex($mobile, 300, $value);
 
 
-        return $this->success(['code' => 0, 'image'=>$image,'mobile'=>$mobile,'value'=>$value, 'expire' => 300]);
-
+        return $this->success(['code' => 0, 'image' => $image, 'mobile' => $mobile, 'value' => $value, 'expire' => 300]);
 
     }
 
@@ -86,19 +87,22 @@ class ImageController extends Controller
         if ($value != $captcha) {
             throw new RestfulException('图形验证码不对！请重新输入。');
         }
-        //销毁图形验证码
+        // 销毁图形验证码
         $redis->del($mobile);
 
-        //发送短信 todo
+        // 发送短信
+        $code = mt_rand(1000, 9999);
+        $msgContent = "您的验证码是${code}，用于登录321回收平台。如非本人操作，请忽略本短信";
+        $msgSendUrl = CommonConst::SMS_API . "sms?u=" . CommonConst::SMS_USER . "&p=" . md5(CommonConst::SMS_API_KEY) . "&m=" . $mobile . "&c=" . urlencode($msgContent);
+        $sendResult = file_get_contents($msgSendUrl);
+        if ($sendResult != "0") {
+            $errorMsg = CommonConst::SMS_SEND_STATUS[$sendResult];
+            throw new RestfulException($errorMsg);
+        }
 
+        // 短信验证码存入redis
+        $redis->hset('sms_code', $mobile, $code);
 
-        $code = '56809';
-        //end
-
-
-        //短信验证码存入redis
-        $redis->hset('sms_code',$mobile,$code);
-
-        return $this->success(['code' => $code, 'mobile'=>$mobile]);
+        return $this->success(['code' => $code, 'mobile' => $mobile]);
     }
 }
