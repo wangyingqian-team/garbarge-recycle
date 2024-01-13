@@ -11,10 +11,10 @@ class GarbageRecycleConst
 {
     /*
     |----------------------------------------
-    | 回收员ID
+    | 回收员ID：写死固定为1
     |----------------------------------------
     */
-    const RECYCLER_ID = 101;
+    const RECYCLER_USER_ID = 1;
 
 
     /*
