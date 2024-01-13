@@ -280,6 +280,13 @@ class GarbageRecycleOrderService
             throw new RestfulException('该回收订单不属于回收中状态，不可完成！');
         }
 
+        // 检查订单有没有配置分类明细.
+        $checkOrderDetails = GarbageOrderDetailModel::query()->where('garbage_order_no', $orderNo)->count();
+
+        if ($checkOrderDetails <= 0) {
+            throw new RestfulException('请添加完订单分类后再点击完成结算！');
+        }
+
         // 计算订单促销信息
         $totalAmount = $recycleAmount;
         $userId = $orderInfo['user_id'];
