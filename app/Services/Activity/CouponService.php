@@ -54,12 +54,15 @@ class CouponService
      */
     public function useCoupon($userId, $id, $orderOn)
     {
-        $coupon = CouponRecordModel::query()->where(['user_id' => $userId, 'id' => $id, 'status' => 1])->macroFirst();
+        $coupon = CouponRecordModel::query()
+            ->where(['user_id' => $userId, 'id' => $id, 'status' => 0])
+            ->orWhere(['user_id' => $userId, 'id' => $id, 'status' => 1])
+            ->macroFirst();
         if (empty($coupon)){
-            throw new RestfulException('话费券使用异常，请稍后再试！');
+            throw new RestfulException('优惠券使用异常，请稍后再试！');
         }
 
-        CouponRecordModel::query()->where('id', $id)->update(['status' => 2, 'order_no' => $orderOn, 'used_time' => time()]);
+        CouponRecordModel::query()->where('id', $id)->update(['status' => 2, 'order_no' => $orderOn, 'used_time' => date("Y-m-d H:i:s", time())]);
 
         return true;
     }
@@ -73,6 +76,17 @@ class CouponService
     public function verifyCoupon($id)
     {
         return CouponRecordModel::query()->whereKey($id)->update(['status' => 3]);
+    }
+
+    /**
+     * 优惠券用户记录详情
+     *
+     * @param $id
+     * @return mixed
+     */
+    public function getCouponRecordDetail($id)
+    {
+        return CouponRecordModel::query()->whereKey($id)->macroFirst();
     }
 
     /**

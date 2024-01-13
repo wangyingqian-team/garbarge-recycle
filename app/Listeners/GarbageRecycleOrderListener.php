@@ -81,7 +81,11 @@ class GarbageRecycleOrderListener
         // redis 更新用户收益
         $redis = Redis::connection('recycle');
         $userIncomeKey = RedisKeyConst::USER_INCOME;
-        $redis->hincrby($userIncomeKey, $userId, $totalAmount);
+        if ($redis->hexists($userIncomeKey, $userId)) {
+            $redis->hincrby($userIncomeKey, $userId, $totalAmount);
+        } else {
+            $redis->hset($userIncomeKey, $userId, $totalAmount);
+        }
 
         // 生成一条通知消息记录
         app(GarbageRecycleOrderService::class)->generateNoticeRecord($userId, $orderNo);

@@ -297,7 +297,6 @@ class GarbageRecycleOrderService
         if (!empty($promotionInfo['bean_num'])) {
             // 扣减绿豆
             app(InvitationService::class)->costBean($userId, $promotionInfo['bean_num']);
-            app(InvitationService::class)->consumeBean($orderInfo);
 
             // 增加交易额
             $beanAmount = $promotionInfo['bean_num'] * ActivityConst::BEAN_WITHDRAW_RATIO;
@@ -310,7 +309,9 @@ class GarbageRecycleOrderService
             // 使用代金券
             app(CouponService::class)->useCoupon($userId, $promotionInfo['voucher_coupon_id'], $orderNo);
             // 增加交易额
-            $voucherCouponInfo = app(CouponService::class)->getCouponDetail($promotionInfo['voucher_coupon_id']);
+            $voucherCouponRecordInfo = app(CouponService::class)->getCouponRecordDetail($promotionInfo['voucher_coupon_id']);
+            $voucherCouponId = $voucherCouponRecordInfo['coupon_id'];
+            $voucherCouponInfo = app(CouponService::class)->getCouponDetail($voucherCouponId);
             $voucherCouponAmount = $voucherCouponInfo['amount'];
             $totalAmount = bcadd($totalAmount, $voucherCouponAmount, 2);
         }
@@ -322,9 +323,11 @@ class GarbageRecycleOrderService
             app(CouponService::class)->useCoupon($userId, $promotionInfo['expand_coupon_id'], $orderNo);
 
             // 计算膨胀金额
-            $expandCouponInfo = app(CouponService::class)->getCouponDetail($promotionInfo['expand_coupon_id']);
-            $expandTimes = $this->getExpandTimes($promotionInfo['expand_coupon_id']);
-            $expandCouponAmount = $recycleAmount * $expandTimes;
+            $expandCouponRecordInfo = app(CouponService::class)->getCouponRecordDetail($promotionInfo['expand_coupon_id']);
+            $expandCouponId = $expandCouponRecordInfo['coupon_id'];
+            $expandCouponInfo = app(CouponService::class)->getCouponDetail($expandCouponId);
+            $expandTimes = $this->getExpandTimes($expandCouponId);
+            $expandCouponAmount = $recycleAmount * ($expandTimes - 1);
             if ($recycleAmount > $expandCouponInfo['amount']) {
                 $expandCouponAmount = $expandCouponInfo['amount'];
             }
@@ -337,7 +340,9 @@ class GarbageRecycleOrderService
         $phoneCouponAmount = 0;
         if (!empty($promotionInfo['phone_coupon_id'])) {
             // 增加交易金额
-            $phoneCouponAmount = $this->getChargeAmount($promotionInfo['phone_coupon_id']);
+            $phoneCouponRecordInfo = app(CouponService::class)->getCouponRecordDetail($promotionInfo['phone_coupon_id']);
+            $phoneCouponId = $phoneCouponRecordInfo['coupon_id'];
+            $phoneCouponAmount = $this->getChargeAmount($phoneCouponId);
             $totalAmount = bcadd($totalAmount, $phoneCouponAmount, 2);
             app(CouponService::class)->useCoupon($userId, $promotionInfo['phone_coupon_id'], $orderNo);
         }
@@ -352,6 +357,7 @@ class GarbageRecycleOrderService
         // 修改订单完成数据.
         GarbageOrderModel::query()->where('order_no', $orderNo)->update([
             'status' => GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_FINISHED,
+            'recycle_amount' => $recycleAmount,
             'total_amount' => $totalAmount,
             'bean_amount' => $beanAmount,
             'voucher_coupon_amount' => $voucherCouponAmount,

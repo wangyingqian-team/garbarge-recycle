@@ -124,7 +124,8 @@ class InvitationService
     public function costBean($userId, $bean)
     {
         //查询绿豆数量
-        $assert = $assert = UserAssetsModel::query()->where('user_id', $userId)->macroFirst();
+        $assert = UserAssetsModel::query()->where('user_id', $userId)->macroFirst();
+        
         if ($assert['bean'] < $bean) {
             throw new RestfulException('绿豆数量不足');
         }
