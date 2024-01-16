@@ -87,6 +87,19 @@ class GarbageRecycleOrderService
     }
 
     /**
+     * 判断用户是否有正在进行中的订单.
+     *
+     * @param $userId
+     * @return false
+     */
+    public function checkOngoingOrder($userId)
+    {
+        $checkOngoingOrderCount = GarbageOrderModel::query()->where('user_id', $userId)
+            ->whereIn('status', GarbageRecycleConst::GARBAGE_RECYCLE_ORDER_STATUS_ONGOING)->count(['id']);
+        return $checkOngoingOrderCount > 0;
+    }
+
+    /**
      * 创建回收订单.
      *
      * @param int $userId

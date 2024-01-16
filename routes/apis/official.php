@@ -103,6 +103,9 @@ Route::get('recycle/garbageType/price', 'GarbageRecycleController@getGarbageType
 // 选择可回收的时间段列表
 Route::get('recycle/timePeriod/list', 'GarbageRecycleController@getRecycleTimePeriodList');
 
+// 判断用户是否有正在进行中的订单
+Route::get('recycle/order/ongoing', 'GarbageRecycleController@checkOngoingOrder');
+
 // 创建回收订单
 Route::post('recycle/order/create', 'GarbageRecycleController@createGarbageRecycleOrder');
 

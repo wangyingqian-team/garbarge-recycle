@@ -43,6 +43,18 @@ class GarbageRecycleController extends BaseController
     }
 
     /**
+     * 判断用户是否有正在进行中的订单.
+     *
+     * @return mixed
+     */
+    public function checkOngoingOrder()
+    {
+        $result = app(GarbageRecycleOrderService::class)->checkOngoingOrder($this->userId);
+
+        return $this->success($result);
+    }
+
+    /**
      * 创建回收订单.
      *
      * @return mixed
